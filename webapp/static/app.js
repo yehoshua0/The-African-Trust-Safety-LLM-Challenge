@@ -1475,12 +1475,12 @@ function _renderGenStatus(loaded) {
 
     if (loaded) {
         dot.className = 'status-dot online';
-        txt.textContent = 'Gemma-4-E2B-Uncensored-Aggressive — Loaded (GPU)';
+        txt.textContent = 'Gemma-4-E2B-Uncensored-Aggressive — Loaded (CPU)';
         btnLoad.classList.add('hidden');
         btnUnload.classList.remove('hidden');
         btnGen.disabled = false;
         if (chatDot) chatDot.className = 'status-dot online';
-        if (chatTxt) chatTxt.textContent = 'Gemma-4-E2B-Uncensored-Aggressive — Loaded (GPU)';
+        if (chatTxt) chatTxt.textContent = 'Gemma-4-E2B-Uncensored-Aggressive — Loaded (CPU)';
         if (chatBtnLoad) chatBtnLoad.classList.add('hidden');
         if (chatBtnUnload) chatBtnUnload.classList.remove('hidden');
         if (chatBtnSend) chatBtnSend.disabled = false;

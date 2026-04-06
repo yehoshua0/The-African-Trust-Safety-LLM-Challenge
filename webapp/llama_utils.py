@@ -33,13 +33,12 @@ def load_hauhau_model(gguf_path: str) -> None:
         logger.info("Loading GGUF model from %s", gguf_path)
         _llama_instance = Llama(
             model_path=gguf_path,
-            n_gpu_layers=-1,    # all layers on GPU
+            n_gpu_layers=0,     # CPU inference (no CUDA build)
             n_ctx=8192,
-            verbose=True,       # shows CUDA layer alloc — set False once confirmed working
+            verbose=False,
         )
         _model_path = gguf_path
-        loaded_n_gpu = getattr(_llama_instance, '_model', None)
-        logger.info("GGUF model loaded — n_gpu_layers=-1 (all to GPU if CUDA build)")
+        logger.info("GGUF model loaded successfully (CPU)")
 
 
 def unload_hauhau_model() -> None:
