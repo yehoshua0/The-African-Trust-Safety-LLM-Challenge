@@ -35,10 +35,11 @@ def load_hauhau_model(gguf_path: str) -> None:
             model_path=gguf_path,
             n_gpu_layers=-1,    # all layers on GPU
             n_ctx=8192,
-            verbose=False,
+            verbose=True,       # shows CUDA layer alloc — set False once confirmed working
         )
         _model_path = gguf_path
-        logger.info("GGUF model loaded successfully")
+        loaded_n_gpu = getattr(_llama_instance, '_model', None)
+        logger.info("GGUF model loaded — n_gpu_layers=-1 (all to GPU if CUDA build)")
 
 
 def unload_hauhau_model() -> None:
@@ -77,6 +78,34 @@ def generate_breaks(
                 {"role": "system", "content": system_prompt},
                 {"role": "user", "content": user_prompt},
             ],
+            temperature=temperature,
+            top_p=top_p,
+            top_k=top_k,
+            max_tokens=max_tokens,
+        )
+
+    return result["choices"][0]["message"]["content"].strip()
+
+
+def generate_chat(
+    messages: list,
+    temperature: float = 0.7,
+    top_p: float = 0.95,
+    top_k: int = 40,
+    max_tokens: int = 2048,
+) -> str:
+    """Run multi-turn chat completion (full message history).
+
+    `messages` is a list of {"role": "user"|"assistant"|"system", "content": str}.
+    Returns the raw text of the new assistant turn.
+    Raises RuntimeError if no model is loaded.
+    """
+    if _llama_instance is None:
+        raise RuntimeError("Hauhau model is not loaded. Load it first.")
+
+    with _llama_lock:
+        result = _llama_instance.create_chat_completion(
+            messages=messages,
             temperature=temperature,
             top_p=top_p,
             top_k=top_k,

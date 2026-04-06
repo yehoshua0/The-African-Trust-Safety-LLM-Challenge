@@ -1110,6 +1110,51 @@ def hauhau_feedback(req: HauhauFeedbackReq):
     return {"saved": True, "status": req.status}
 
 
+# ========================== HAUHAU CHAT ====================================
+
+class HauhauChatMessage(BaseModel):
+    role: str      # "user" | "assistant" | "system"
+    content: str
+
+class HauhauChatReq(BaseModel):
+    messages: list[HauhauChatMessage]
+    system: str = ""    # optional system prompt (prepended if provided)
+    temperature: float = 0.7
+    max_tokens: int = 2048
+
+@app.post("/api/hauhau/chat")
+def hauhau_chat(req: HauhauChatReq):
+    """Single-turn endpoint for the conversational chat tab.
+
+    The client sends the full message history; this returns the next assistant turn.
+    Conversation state is maintained entirely on the client side.
+    """
+    if not llama_utils.is_hauhau_loaded():
+        raise HTTPException(400, "Hauhau model not loaded. Load it first.")
+    if not 1 <= req.max_tokens <= 8192:
+        raise HTTPException(400, "max_tokens must be 1–8192")
+    if not 0.0 <= req.temperature <= 2.0:
+        raise HTTPException(400, "temperature must be 0–2")
+
+    messages = []
+    if req.system.strip():
+        messages.append({"role": "system", "content": req.system.strip()})
+    messages.extend({"role": m.role, "content": m.content} for m in req.messages)
+
+    try:
+        reply = llama_utils.generate_chat(
+            messages=messages,
+            temperature=req.temperature,
+            max_tokens=req.max_tokens,
+        )
+    except RuntimeError as e:
+        raise HTTPException(400, str(e))
+    except Exception as e:
+        raise HTTPException(500, f"Chat error: {e}")
+
+    return {"reply": reply}
+
+
 # ========================== HISTORY ========================================
 
 @app.get("/api/history")

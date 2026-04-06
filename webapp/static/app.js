@@ -50,6 +50,7 @@ function switchTab(tab) {
     if (tab === 'lab') loadHistory();
     if (tab === 'analysis') loadAnalysis();
     if (tab === 'generator') initGeneratorTab();
+    if (tab === 'chat') initChatTab();
 }
 
 // ===== EVENT LISTENERS =====
@@ -1465,25 +1466,43 @@ function _renderGenStatus(loaded) {
     const btnUnload = $('btn-gen-unload');
     const btnGen = $('btn-generate-breaks');
 
+    // Chat tab mirrors
+    const chatDot = $('chat-status-dot');
+    const chatTxt = $('chat-status-text');
+    const chatBtnLoad = $('btn-chat-load');
+    const chatBtnUnload = $('btn-chat-unload');
+    const chatBtnSend = $('btn-chat-send');
+
     if (loaded) {
         dot.className = 'status-dot online';
         txt.textContent = 'Gemma-4-E2B-Uncensored-Aggressive — Loaded (GPU)';
         btnLoad.classList.add('hidden');
         btnUnload.classList.remove('hidden');
         btnGen.disabled = false;
+        if (chatDot) chatDot.className = 'status-dot online';
+        if (chatTxt) chatTxt.textContent = 'Gemma-4-E2B-Uncensored-Aggressive — Loaded (GPU)';
+        if (chatBtnLoad) chatBtnLoad.classList.add('hidden');
+        if (chatBtnUnload) chatBtnUnload.classList.remove('hidden');
+        if (chatBtnSend) chatBtnSend.disabled = false;
     } else {
         dot.className = 'status-dot offline';
         txt.textContent = 'Gemma-4-E2B-Uncensored — Not loaded';
         btnLoad.classList.remove('hidden');
         btnUnload.classList.add('hidden');
         btnGen.disabled = true;
+        if (chatDot) chatDot.className = 'status-dot offline';
+        if (chatTxt) chatTxt.textContent = 'Gemma-4-E2B-Uncensored — Not loaded';
+        if (chatBtnLoad) { chatBtnLoad.classList.remove('hidden'); chatBtnLoad.disabled = false; chatBtnLoad.innerHTML = 'Load Model'; }
+        if (chatBtnUnload) chatBtnUnload.classList.add('hidden');
+        if (chatBtnSend) chatBtnSend.disabled = true;
     }
 }
 
 async function loadHauhauModel() {
+    // Disable both load buttons while loading
     const btn = $('btn-gen-load');
-    btn.disabled = true;
-    btn.innerHTML = '<span class="spinner"></span> Loading…';
+    const chatBtn = $('btn-chat-load');
+    [btn, chatBtn].forEach(b => { if (b) { b.disabled = true; b.innerHTML = '<span class="spinner"></span> Loading…'; } });
     try {
         await api('/api/hauhau/load', { method: 'POST' });
         generatorState.loaded = true;
@@ -1491,8 +1510,7 @@ async function loadHauhauModel() {
         showToast('Gemma-4 loaded — GPU ready');
     } catch (e) {
         showToast(e.message, 'error');
-        btn.disabled = false;
-        btn.innerHTML = 'Load Model';
+        [btn, chatBtn].forEach(b => { if (b) { b.disabled = false; b.innerHTML = 'Load Model'; } });
     }
 }
 
@@ -1764,4 +1782,116 @@ function _appendFeedbackLog(prompt, status) {
         <span class="gen-feedback-ts text-muted">${new Date().toLocaleTimeString()}</span>`;
     log.insertBefore(row, log.firstChild);
 }
+
+// ============================= GEMMA CHAT ==================================
+
+const chatState = {
+    messages: [],   // [{role, content}]
+};
+
+function initChatTab() {
+    checkHauhauStatus();
+    // Restore any existing messages
+    _renderChatMessages();
+}
+
+function toggleChatSystem() {
+    const body = $('chat-sys-body');
+    const toggle = $('chat-sys-toggle');
+    const hidden = body.style.display === 'none';
+    body.style.display = hidden ? '' : 'none';
+    toggle.textContent = hidden ? '▾' : '▸';
+}
+
+function handleChatKey(event) {
+    // Enter sends; Shift+Enter inserts newline
+    if (event.key === 'Enter' && !event.shiftKey) {
+        event.preventDefault();
+        sendChatMessage();
+    }
+}
+
+async function sendChatMessage() {
+    const input = $('chat-input');
+    const text = input.value.trim();
+    if (!text) return;
+    if (!generatorState.loaded) {
+        showToast('Load the model first', 'error');
+        return;
+    }
+
+    input.value = '';
+    input.style.height = '';
+
+    // Add user turn to state and render immediately
+    chatState.messages.push({ role: 'user', content: text });
+    _renderChatMessages();
+
+    // Show spinner, disable send
+    $('chat-spinner').classList.remove('hidden');
+    $('btn-chat-send').disabled = true;
+
+    const system = ($('chat-system-prompt').value || '').trim();
+    const temperature = parseFloat($('chat-temp').value) || 0.7;
+    const max_tokens = parseInt($('chat-max-tokens').value) || 2048;
+
+    try {
+        const data = await api('/api/hauhau/chat', {
+            method: 'POST',
+            body: JSON.stringify({
+                messages: chatState.messages,
+                system,
+                temperature,
+                max_tokens,
+            }),
+        });
+        chatState.messages.push({ role: 'assistant', content: data.reply });
+        _renderChatMessages();
+    } catch (e) {
+        // Show error inline
+        chatState.messages.push({ role: 'assistant', content: `⚠️ Error: ${e.message}` });
+        _renderChatMessages();
+    } finally {
+        $('chat-spinner').classList.add('hidden');
+        $('btn-chat-send').disabled = !generatorState.loaded;
+    }
+}
+
+function clearChat() {
+    chatState.messages = [];
+    _renderChatMessages();
+}
+
+function _renderChatMessages() {
+    const container = $('chat-messages');
+    const emptyHint = $('chat-empty-hint');
+
+    if (chatState.messages.length === 0) {
+        if (emptyHint) emptyHint.style.display = '';
+        // Remove all bubbles
+        container.querySelectorAll('.chat-bubble-row').forEach(el => el.remove());
+        return;
+    }
+    if (emptyHint) emptyHint.style.display = 'none';
+
+    // Rebuild from scratch for simplicity (messages are short-lived in-session)
+    container.querySelectorAll('.chat-bubble-row').forEach(el => el.remove());
+
+    chatState.messages.forEach(msg => {
+        const row = document.createElement('div');
+        row.className = `chat-bubble-row chat-bubble-${msg.role}`;
+
+        const bubble = document.createElement('div');
+        bubble.className = `chat-bubble`;
+        // Render newlines; escape HTML
+        bubble.innerHTML = escapeHtml(msg.content).replace(/\n/g, '<br>');
+
+        row.appendChild(bubble);
+        container.appendChild(row);
+    });
+
+    // Scroll to bottom
+    container.scrollTop = container.scrollHeight;
+}
+
 
