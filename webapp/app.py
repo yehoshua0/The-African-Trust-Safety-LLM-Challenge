@@ -1157,6 +1157,47 @@ def hauhau_chat(req: HauhauChatReq):
     return {"reply": reply}
 
 
+@app.post("/api/hauhau/chat/stream")
+def hauhau_chat_stream(req: HauhauChatReq):
+    """Streaming SSE endpoint for the chat tab.
+
+    Returns tokens via Server-Sent Events as they are generated.
+    Each event is: data: {"token": "..."}\n\n
+    Terminates with: data: [DONE]\n\n
+    """
+    import json as _json
+
+    if not llama_utils.is_hauhau_loaded():
+        raise HTTPException(400, "Hauhau model not loaded. Load it first.")
+    if not 1 <= req.max_tokens <= 8192:
+        raise HTTPException(400, "max_tokens must be 1–8192")
+    if not 0.0 <= req.temperature <= 2.0:
+        raise HTTPException(400, "temperature must be 0–2")
+
+    messages = []
+    if req.system.strip():
+        messages.append({"role": "system", "content": req.system.strip()})
+    messages.extend({"role": m.role, "content": m.content} for m in req.messages)
+
+    def event_generator():
+        try:
+            for token in llama_utils.generate_chat_stream(
+                messages=messages,
+                temperature=req.temperature,
+                max_tokens=req.max_tokens,
+            ):
+                yield f"data: {_json.dumps({'token': token})}\n\n"
+        except Exception as e:
+            yield f"data: {_json.dumps({'error': str(e)})}\n\n"
+        yield "data: [DONE]\n\n"
+
+    return StreamingResponse(
+        event_generator(),
+        media_type="text/event-stream",
+        headers={"Cache-Control": "no-cache", "X-Accel-Buffering": "no"},
+    )
+
+
 # ========================== HISTORY ========================================
 
 @app.get("/api/history")

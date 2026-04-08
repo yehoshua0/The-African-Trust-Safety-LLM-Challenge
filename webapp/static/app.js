@@ -1475,12 +1475,12 @@ function _renderGenStatus(loaded) {
 
     if (loaded) {
         dot.className = 'status-dot online';
-        txt.textContent = 'Gemma-4-E2B-Uncensored-Aggressive — Loaded (CPU)';
+        txt.textContent = 'Gemma-4-E2B-Uncensored-Aggressive — Loaded (GPU)';
         btnLoad.classList.add('hidden');
         btnUnload.classList.remove('hidden');
         btnGen.disabled = false;
         if (chatDot) chatDot.className = 'status-dot online';
-        if (chatTxt) chatTxt.textContent = 'Gemma-4-E2B-Uncensored-Aggressive — Loaded (CPU)';
+        if (chatTxt) chatTxt.textContent = 'Gemma-4-E2B-Uncensored-Aggressive — Loaded (GPU)';
         if (chatBtnLoad) chatBtnLoad.classList.add('hidden');
         if (chatBtnUnload) chatBtnUnload.classList.remove('hidden');
         if (chatBtnSend) chatBtnSend.disabled = false;
@@ -1835,9 +1835,14 @@ async function sendChatMessage() {
     const temperature = parseFloat($('chat-temp').value) || 0.7;
     const max_tokens = parseInt($('chat-max-tokens').value) || 2048;
 
+    // Create a live assistant bubble for streaming output
+    let accum = '';
+    const liveBubble = _appendLiveChatBubble();
+
     try {
-        const data = await api('/api/hauhau/chat', {
+        const resp = await fetch('/api/hauhau/chat/stream', {
             method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({
                 messages: chatState.messages,
                 system,
@@ -1845,16 +1850,72 @@ async function sendChatMessage() {
                 max_tokens,
             }),
         });
-        chatState.messages.push({ role: 'assistant', content: data.reply });
+
+        if (!resp.ok) {
+            const err = await resp.json().catch(() => ({ detail: resp.statusText }));
+            throw new Error(err.detail || resp.statusText);
+        }
+
+        const reader = resp.body.getReader();
+        const decoder = new TextDecoder();
+        let buf = '';
+
+        while (true) {
+            const { done, value } = await reader.read();
+            if (done) break;
+            buf += decoder.decode(value, { stream: true });
+            // Process complete SSE lines
+            const lines = buf.split('\n');
+            buf = lines.pop(); // last item may be incomplete
+            for (const line of lines) {
+                if (!line.startsWith('data: ')) continue;
+                const payload = line.slice(6).trim();
+                if (payload === '[DONE]') break;
+                try {
+                    const obj = JSON.parse(payload);
+                    if (obj.error) throw new Error(obj.error);
+                    if (obj.token) {
+                        accum += obj.token;
+                        _updateLiveChatBubble(liveBubble, accum);
+                    }
+                } catch (_) { /* skip malformed */ }
+            }
+        }
+
+        // Finalise — replace live bubble with proper rendered message
+        chatState.messages.push({ role: 'assistant', content: accum });
+        liveBubble.closest('.chat-bubble-row').remove();
         _renderChatMessages();
     } catch (e) {
-        // Show error inline
         chatState.messages.push({ role: 'assistant', content: `⚠️ Error: ${e.message}` });
+        liveBubble.closest('.chat-bubble-row').remove();
         _renderChatMessages();
     } finally {
         $('chat-spinner').classList.add('hidden');
         $('btn-chat-send').disabled = !generatorState.loaded;
     }
+}
+
+function _appendLiveChatBubble() {
+    const container = $('chat-messages');
+    const emptyHint = $('chat-empty-hint');
+    if (emptyHint) emptyHint.style.display = 'none';
+    const row = document.createElement('div');
+    row.className = 'chat-bubble-row chat-bubble-assistant';
+    const bubble = document.createElement('div');
+    bubble.className = 'chat-bubble chat-bubble-streaming';
+    bubble.textContent = '▌'; // blinking cursor placeholder
+    row.appendChild(bubble);
+    container.appendChild(row);
+    container.scrollTop = container.scrollHeight;
+    return bubble;
+}
+
+function _updateLiveChatBubble(bubble, text) {
+    // Show plain text while streaming (fast), append cursor
+    bubble.textContent = text + '▌';
+    const container = $('chat-messages');
+    container.scrollTop = container.scrollHeight;
 }
 
 function clearChat() {
@@ -1882,9 +1943,20 @@ function _renderChatMessages() {
         row.className = `chat-bubble-row chat-bubble-${msg.role}`;
 
         const bubble = document.createElement('div');
-        bubble.className = `chat-bubble`;
-        // Render newlines; escape HTML
-        bubble.innerHTML = escapeHtml(msg.content).replace(/\n/g, '<br>');
+        bubble.className = 'chat-bubble';
+
+        if (msg.role === 'assistant') {
+            // Render markdown for assistant messages
+            const raw = (typeof marked !== 'undefined')
+                ? marked.parse(msg.content)
+                : escapeHtml(msg.content).replace(/\n/g, '<br>');
+            bubble.innerHTML = (typeof DOMPurify !== 'undefined')
+                ? DOMPurify.sanitize(raw)
+                : raw;
+        } else {
+            // User/system messages: plain text
+            bubble.textContent = msg.content;
+        }
 
         row.appendChild(bubble);
         container.appendChild(row);

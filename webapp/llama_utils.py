@@ -33,12 +33,13 @@ def load_hauhau_model(gguf_path: str) -> None:
         logger.info("Loading GGUF model from %s", gguf_path)
         _llama_instance = Llama(
             model_path=gguf_path,
-            n_gpu_layers=0,     # CPU inference (no CUDA build)
+            n_gpu_layers=-1,    # all layers on GPU; set to 0 if no CUDA build
             n_ctx=8192,
             verbose=False,
         )
         _model_path = gguf_path
-        logger.info("GGUF model loaded successfully (CPU)")
+        loaded = getattr(_llama_instance, 'n_gpu_layers', 0)
+        logger.info("GGUF model loaded successfully (GPU layers: %s)", loaded)
 
 
 def unload_hauhau_model() -> None:
@@ -112,3 +113,35 @@ def generate_chat(
         )
 
     return result["choices"][0]["message"]["content"].strip()
+
+
+def generate_chat_stream(
+    messages: list,
+    temperature: float = 0.7,
+    top_p: float = 0.95,
+    top_k: int = 40,
+    max_tokens: int = 2048,
+):
+    """Generator that yields text tokens one at a time for streaming responses.
+
+    `messages` is a list of {"role": "user"|"assistant"|"system", "content": str}.
+    Yields str tokens as they are produced.
+    Raises RuntimeError if no model is loaded.
+    """
+    if _llama_instance is None:
+        raise RuntimeError("Hauhau model is not loaded. Load it first.")
+
+    stream = _llama_instance.create_chat_completion(
+        messages=messages,
+        temperature=temperature,
+        top_p=top_p,
+        top_k=top_k,
+        max_tokens=max_tokens,
+        stream=True,
+    )
+
+    for chunk in stream:
+        delta = chunk["choices"][0].get("delta", {})
+        token = delta.get("content")
+        if token:
+            yield token
