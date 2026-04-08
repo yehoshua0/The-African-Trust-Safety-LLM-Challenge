@@ -40,6 +40,8 @@ from database import (
     save_prompt_history,
     get_prompt_history,
     get_next_attack_id,
+    clear_all_breaks,
+    clear_all_history,
 )
 from openai_utils import optimize_prompt, generate_context_notes, translate_prompt, categorize_attack, generate_attack_ideas, verify_refusal
 import llama_utils
@@ -1160,6 +1162,20 @@ def hauhau_chat(req: HauhauChatReq):
 @app.get("/api/history")
 def get_history(limit: int = 50):
     return get_prompt_history(limit)
+
+
+@app.delete("/api/breaks")
+def reset_breaks_db():
+    """Delete all rows from the breaks table."""
+    count = clear_all_breaks()
+    return {"deleted": count, "message": f"Breaks DB cleared ({count} records deleted)"}
+
+
+@app.delete("/api/history")
+def reset_history():
+    """Delete all rows from prompt_history."""
+    count = clear_all_history()
+    return {"deleted": count, "message": f"History cleared ({count} records deleted)"}
 
 
 # ========================== EXPORT =========================================

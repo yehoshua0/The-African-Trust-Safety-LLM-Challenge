@@ -343,6 +343,8 @@ textarea {
 .btn-danger:hover:not(:disabled) { background: #b91c1c; }
 .btn-ghost { background: none; color: var(--text-secondary); border: 1px solid var(--border); }
 .btn-ghost:hover:not(:disabled) { background: var(--bg-hover); color: var(--text); }
+.btn-danger { background: #c0392b; color: #fff; border: none; }
+.btn-danger:hover:not(:disabled) { background: #e74c3c; }
 .btn-sm { padding: 6px 12px; font-size: 12px; border-radius: var(--radius-sm); }
 .actions-row {
     display: flex;

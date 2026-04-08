@@ -186,3 +186,27 @@ def get_failed_attempts_for_context(language: str, limit: int = 30) -> list[dict
     ).fetchall()
     conn.close()
     return [dict(r) for r in rows]
+
+
+# ---------------------------------------------------------------------------
+# Reset / clear helpers
+# ---------------------------------------------------------------------------
+
+def clear_all_breaks() -> int:
+    """Delete every row from the breaks table. Returns number of rows deleted."""
+    conn = get_connection()
+    cursor = conn.execute("DELETE FROM breaks")
+    conn.commit()
+    count = cursor.rowcount
+    conn.close()
+    return count
+
+
+def clear_all_history() -> int:
+    """Delete every row from prompt_history. Returns number of rows deleted."""
+    conn = get_connection()
+    cursor = conn.execute("DELETE FROM prompt_history")
+    conn.commit()
+    count = cursor.rowcount
+    conn.close()
+    return count

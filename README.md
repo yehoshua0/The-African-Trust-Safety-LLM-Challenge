@@ -19,13 +19,6 @@ A web-based tool for the [Zindi African Trust & Safety LLM Challenge](https://zi
   - Translation between languages
 - **Export** — Generate Zindi-format markdown submissions from saved breaks
 
-## Screenshots
-
-<details>
-<summary>Prompt Lab</summary>
-Dark-themed interface with model selector, prompt editor, streaming response display, and validation controls.
-</details>
-
 ## Requirements
 
 - **Python 3.10+**

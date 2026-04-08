@@ -399,6 +399,28 @@
                     <h3>About Safety</h3>
                     <p class="text-muted">This tool is designed for the <strong>Zindi African Trust & Safety LLM Challenge</strong> — an authorized red-teaming competition. All OpenAI requests include explicit framing that this is sanctioned safety research to evaluate and improve African language models. No data is sent to external servers except the OpenAI API when you explicitly use AI features.</p>
                 </div>
+
+                <div class="card" style="border:1px solid #c0392b33">
+                    <h3 style="color:#e74c3c">Danger Zone</h3>
+                    <p class="text-muted mb-12">These actions are permanent and cannot be undone.</p>
+                    <div style="display:flex;flex-direction:column;gap:12px">
+                        <div style="display:flex;align-items:center;justify-content:space-between;gap:16px;flex-wrap:wrap">
+                            <div>
+                                <div style="font-weight:600;font-size:14px">Reset Breaks DB</div>
+                                <div class="text-muted" style="font-size:12px">Delete all confirmed break records from the database.</div>
+                            </div>
+                            <button class="btn btn-danger btn-sm" onclick="confirmResetBreaks()">Reset Breaks DB</button>
+                        </div>
+                        <hr style="border:none;border-top:1px solid var(--border-subtle)">
+                        <div style="display:flex;align-items:center;justify-content:space-between;gap:16px;flex-wrap:wrap">
+                            <div>
+                                <div style="font-weight:600;font-size:14px">Clear Prompt History</div>
+                                <div class="text-muted" style="font-size:12px">Delete all recent prompt test history (including generator feedback memory).</div>
+                            </div>
+                            <button class="btn btn-danger btn-sm" onclick="confirmClearHistory()">Clear History</button>
+                        </div>
+                    </div>
+                </div>
             </section>
 
             <!-- ===== BREAK GENERATOR ===== -->

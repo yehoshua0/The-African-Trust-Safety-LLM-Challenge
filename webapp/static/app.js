@@ -1894,4 +1894,33 @@ function _renderChatMessages() {
     container.scrollTop = container.scrollHeight;
 }
 
+// ============================= DANGER ZONE ================================
+
+async function confirmResetBreaks() {
+    if (!confirm('Reset the entire Breaks DB?\n\nThis will permanently delete ALL confirmed break records. This cannot be undone.')) return;
+    // Double-confirm for safety
+    if (!confirm('Are you absolutely sure? All break records will be lost.')) return;
+    try {
+        const data = await api('/api/breaks', { method: 'DELETE' });
+        showToast(data.message, 'success');
+        // Reload breaks list if on that tab
+        if (state.currentTab === 'breaks') loadBreaks();
+    } catch (e) {
+        showToast(e.message, 'error');
+    }
+}
+
+async function confirmClearHistory() {
+    if (!confirm('Clear all prompt history?\n\nThis will permanently delete all test history and generator feedback memory. This cannot be undone.')) return;
+    if (!confirm('Are you absolutely sure? Generator memory will also be wiped.')) return;
+    try {
+        const data = await api('/api/history', { method: 'DELETE' });
+        showToast(data.message, 'success');
+        // Reload history if on lab tab
+        if (state.currentTab === 'lab') loadHistory();
+    } catch (e) {
+        showToast(e.message, 'error');
+    }
+}
+
 
