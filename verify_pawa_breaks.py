@@ -1,8 +1,9 @@
-"""Run fresh local verification passes against cached Pawa-Gemma-Swahili-2B.
+"""Run fresh local verification passes against cached GGUF model.
 
-This script loads the model from the user's Hugging Face cache, replays a
-curated shortlist of challenge prompts, and stores full multi-run outputs for
-manual review.
+This script loads the GGUF model from cache, replays a curated shortlist
+of challenge prompts, and stores full multi-run outputs for manual review.
+
+Uses llama.cpp (GGUF) — no NVIDIA CUDA required. Works on Intel Arc / CPU.
 """
 
 from __future__ import annotations
@@ -13,19 +14,12 @@ import random
 import time
 from pathlib import Path
 
-import torch
-from transformers import AutoModelForCausalLM, AutoTokenizer
+import sys
+import os
+sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 
+from model_utils import load_model, generate_response
 
-MODEL_SNAPSHOT = (
-    Path.home()
-    / '.cache'
-    / 'huggingface'
-    / 'hub'
-    / 'models--sartifyllc--Pawa-Gemma-Swahili-2B'
-    / 'snapshots'
-    / '4c9712a65945a06e14376b161fe161ddd7f6f9eb'
-)
 
 SOURCE_FILES = [
     Path('outputs/results_swahili_20260320_221824.json'),
@@ -104,7 +98,16 @@ def read_json(path: Path) -> list[dict]:
 
 
 def load_candidates() -> list[dict]:
-    loaded = {source: read_json(source) for source in SOURCE_FILES}
+    loaded = {}
+    for source in SOURCE_FILES:
+        if source.exists():
+            loaded[source] = read_json(source)
+
+    if not loaded:
+        raise FileNotFoundError(
+            f"No source files found. Expected: {[str(s) for s in SOURCE_FILES]}"
+        )
+
     attacks: dict[str, dict] = {}
     attack_sources: dict[str, Path] = {}
 
@@ -113,7 +116,7 @@ def load_candidates() -> list[dict]:
             attacks[row['attack_id']] = row
             attack_sources[row['attack_id']] = source
 
-    missing = [attack_id for attack_id in CANDIDATE_IDS if attack_id not in attacks]
+    missing = [aid for aid in CANDIDATE_IDS if aid not in attacks]
     if missing:
         raise KeyError(f'Missing candidate attack ids: {missing}')
 
@@ -123,33 +126,6 @@ def load_candidates() -> list[dict]:
         row['source_file'] = str(attack_sources[attack_id])
         selected.append(row)
     return selected
-
-
-def load_model():
-    tokenizer = AutoTokenizer.from_pretrained(
-        str(MODEL_SNAPSHOT), local_files_only=True, trust_remote_code=True
-    )
-    model = AutoModelForCausalLM.from_pretrained(
-        str(MODEL_SNAPSHOT),
-        local_files_only=True,
-        trust_remote_code=True,
-        dtype=torch.bfloat16,
-        device_map={'': 0},
-    )
-    model.eval()
-    return model, tokenizer
-
-
-def build_input(tokenizer, prompt: str) -> str:
-    if tokenizer.chat_template:
-        messages = [{'role': 'user', 'content': prompt}]
-        try:
-            return tokenizer.apply_chat_template(
-                messages, tokenize=False, add_generation_prompt=True
-            )
-        except Exception:
-            pass
-    return prompt
 
 
 def classify_likely_break(text: str) -> str:
@@ -164,7 +140,6 @@ def classify_likely_break(text: str) -> str:
 
 def run_generation(
     model,
-    tokenizer,
     prompt: str,
     seed: int,
     max_new_tokens: int,
@@ -173,27 +148,17 @@ def run_generation(
     repetition_penalty: float,
 ) -> dict:
     random.seed(seed)
-    torch.manual_seed(seed)
-    torch.cuda.manual_seed_all(seed)
-
-    input_text = build_input(tokenizer, prompt)
-    inputs = tokenizer(input_text, return_tensors='pt').to(model.device)
-    input_length = inputs['input_ids'].shape[1]
 
     started = time.perf_counter()
-    with torch.no_grad():
-        outputs = model.generate(
-            **inputs,
-            max_new_tokens=max_new_tokens,
-            temperature=temperature,
-            top_p=top_p,
-            repetition_penalty=repetition_penalty,
-            do_sample=True,
-        )
+    response = generate_response(
+        model, None, prompt,
+        max_new_tokens=max_new_tokens,
+        temperature=temperature,
+        top_p=top_p,
+        repetition_penalty=repetition_penalty,
+    )
     elapsed = round(time.perf_counter() - started, 2)
-    response = tokenizer.decode(
-        outputs[0][input_length:], skip_special_tokens=True
-    ).strip()
+
     return {
         'seed': seed,
         'elapsed_sec': elapsed,
@@ -206,7 +171,10 @@ def run_generation(
 def main() -> None:
     args = parse_args()
     candidates = load_candidates()
-    model, tokenizer = load_model()
+
+    print("Loading GGUF model (may take a moment on first run)...")
+    model = load_model("swahili")
+    print("Model loaded.\n")
 
     results = []
     for attack in candidates:
@@ -215,7 +183,6 @@ def main() -> None:
         for seed in DEFAULT_SEEDS:
             result = run_generation(
                 model=model,
-                tokenizer=tokenizer,
                 prompt=attack['prompt_original'],
                 seed=seed,
                 max_new_tokens=args.max_new_tokens,
@@ -233,7 +200,7 @@ def main() -> None:
             {
                 'attack_id': attack['attack_id'],
                 'source_file': attack['source_file'],
-                'model_name': 'Pawa-Gemma-Swahili-2B',
+                'model_name': 'Pawa-Gemma-Swahili-2B (GGUF)',
                 'language': attack.get('language', 'Swahili'),
                 'attack_type': attack['attack_type'],
                 'risk_category': attack['risk_category'],
@@ -251,7 +218,7 @@ def main() -> None:
     output_path.write_text(
         json.dumps(
             {
-                'model_snapshot': str(MODEL_SNAPSHOT),
+                'backend': 'llama.cpp (GGUF)',
                 'seeds': DEFAULT_SEEDS,
                 'max_new_tokens': args.max_new_tokens,
                 'temperature': args.temperature,
@@ -264,7 +231,7 @@ def main() -> None:
         ),
         encoding='utf-8',
     )
-    print(f'[DONE] wrote {output_path}')
+    print(f'\n[DONE] wrote {output_path}')
 
 
 if __name__ == '__main__':

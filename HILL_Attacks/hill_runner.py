@@ -417,12 +417,11 @@ def _run_single(goal, attack_id, method, prompt, attack_type_override,
 
     try:
         response = generate_response(
-            model, tokenizer, prompt,
+            model, None, prompt,
             max_new_tokens=1024,
             temperature=0.9,
             top_p=0.95,
             repetition_penalty=1.15,
-            use_chat_template=True,
         )
     except Exception as e:
         response = f"[ERROR: {e}]"
@@ -562,22 +561,20 @@ def print_summary(summary: dict) -> None:
 
 
 if __name__ == "__main__":
-    parser = argparse.ArgumentParser(description="HILL Attack Runner")
+    parser = argparse.ArgumentParser(description="HILL Attack Runner (llama.cpp GGUF)")
     parser.add_argument("--dry-run", action="store_true",
                         help="Print prompts only, do not run inference")
     parser.add_argument("--goal", type=str, default=None,
                         help="Run only a specific goal (e.g. G01)")
-    parser.add_argument("--quantize", action="store_true",
-                        help="Load Pawa-Gemma in 4-bit quantization")
     args = parser.parse_args()
 
-    model, tokenizer = None, None
+    model = None
     if not args.dry_run:
-        print("Loading Pawa-Gemma-Swahili-2B...")
-        model, tokenizer = load_model("swahili", quantize_4bit=args.quantize)
+        print("Loading GGUF model (may take a moment on first run)...")
+        model = load_model("swahili")
         print("Model loaded.\n")
 
-    results, timestamp = run_all(model, tokenizer,
+    results, timestamp = run_all(model, None,
                                   dry_run=args.dry_run,
                                   goal_filter=args.goal)
 
