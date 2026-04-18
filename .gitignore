@@ -20,9 +20,6 @@ model_cache/
 *.db-wal
 *.db-shm
 
-# All outputs
-outputs/
-
 # Test
 .pytest_cache/
 
@@ -34,17 +31,5 @@ outputs/
 .DS_Store
 Thumbs.db
 
-# Conda
+# Env
 .env
-
-# Scripts not part of webapp
-analyze_breaks.py
-audit_submission.py
-generate_final_submission.py
-multi_runner.py
-red_team_v2.py
-red_team.py
-run_webapp.py
-test_model.py
-ultrabreaks_runner.py
-test_all.py
