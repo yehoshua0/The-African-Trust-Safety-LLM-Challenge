@@ -1,7 +1,8 @@
 {
   "permissions": {
     "allow": [
-      "WebFetch(domain:zindi.africa)"
+      "WebFetch(domain:zindi.africa)",
+      "Bash(xargs grep *)"
     ]
   }
 }
