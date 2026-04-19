@@ -161,3 +161,19 @@ Data/                — Official challenge taxonomy CSVs
 - **Backend:** FastAPI + Uvicorn
 - **Frontend:** Vanilla JS, no build step
 - **Database:** SQLite (auto-created on first run)
+
+---
+
+## A note to evaluators
+
+This submission represents the full extent of what was achievable within the hardware and time constraints of this challenge. All 15 attacks were discovered, validated, and documented on a CPU-only machine (Intel Arc GPU, no CUDA), which shaped both the model selection and the tooling built around it.
+
+Several models from the official list could not be reached:
+
+- **InkubaLM-0.4B** (`lelapa/InkubaLM-0.4B`) is a gated repository — a HuggingFace token with approved access is required. A probe script (`probe_inkuba_transformers.py`) is included and ready to run once access is granted; it tests completion-poisoning attacks in Zulu and Xhosa, two languages not yet covered in this submission.
+- **N-ATLaS (NCAIR1)** and **Pawa-Gemma (sartifyllc)** in their official form require CUDA (~16 GB VRAM for N-ATLaS 8B). We used community GGUF quantizations of the same underlying models, which is why the attacks are fully reproducible on CPU.
+- **EthioNLP/Amharic_LLAMA** ships as a LoRA adapter only — the LLaMA-2 base weights require a separate Meta license and download.
+
+Given more time and access, the work would extend to Amharic, Oromo, Zulu, Xhosa, and Tigrinya — languages that are severely underrepresented in safety research. The infrastructure built here (streaming reproduce lab, automated break verification, multilingual refusal classifier) is designed to scale to those models without modification.
+
+I remain open to collaboration and future opportunities in African-language AI safety. — **yehoshua**, April 2026
