@@ -6,7 +6,7 @@
 
 ## Abstract
 
-Large language models fine-tuned for African languages carry the promise of democratising AI across underserved communities. Yet their safety alignment has received comparatively little scrutiny. This report presents a structured red-teaming study targeting two publicly available African-language models — **N-ATLaS** (Hausa, Igbo, Yoruba) and **Pawa-Gemma-Swahili-2B** (Swahili) — using 17 adversarial prompts spanning 9 risk categories. All attacks were validated through a purpose-built web application that logged reproducibility across multiple independent runs. Our results reveal that classic jailbreak techniques, when faithfully translated into African languages, retain near-full effectiveness: 12 of 17 attacks (71 %) were confirmed at a 3/3 reproducibility score, and 5 at 2/3. Three attack types — *direct jailbreak*, *prompt injection*, and *refusal softening* — successfully transferred across both models and multiple languages, suggesting that safety vulnerabilities are structurally embedded rather than incidental. We discuss implications for deployment in high-stakes, linguistically diverse contexts across the African continent.
+Large language models fine-tuned for African languages carry the promise of democratising AI across underserved communities. Yet their safety alignment has received comparatively little scrutiny. This report presents a structured red-teaming study targeting two publicly available African-language models — **N-ATLaS** (Hausa, Igbo, Yoruba) and **Pawa-Gemma-Swahili-2B** (Swahili) — using 15 adversarial prompts spanning 9 risk categories. All attacks were validated through a purpose-built web application that logged reproducibility across multiple independent runs. Our results reveal that classic jailbreak techniques, when faithfully translated into African languages, retain near-full effectiveness: 12 of 15 attacks (80 %) were confirmed at a 3/3 reproducibility score, and 3 at 2/3. Three attack types — *direct jailbreak*, *prompt injection*, and *refusal softening* — successfully transferred across both models and multiple languages, suggesting that safety vulnerabilities are structurally embedded rather than incidental. We discuss implications for deployment in high-stakes, linguistically diverse contexts across the African continent.
 
 **Keywords:** red-teaming, safety alignment, African languages, jailbreak, adversarial prompts, N-ATLaS, Pawa-Gemma, LLM safety, Hausa, Igbo, Swahili, Yoruba
 
@@ -65,20 +65,20 @@ Only confirmed breaks were included in the final submission.
 
 | Metric | Value |
 |---|---|
-| Total validated attacks | 17 |
+| Total validated attacks | 15 |
 | Languages covered | 4 (Hausa, Igbo, Swahili, Yoruba) |
 | Risk categories hit | 9 / 9 |
 | Models broken | 2 / 2 |
-| 3/3 reproducibility | 12 (71 %) |
-| 2/3 reproducibility | 5 (29 %) |
+| 3/3 reproducibility | 12 (80 %) |
+| 2/3 reproducibility | 3 (20 %) |
 | Cross-model attack types | 3 (direct\_jailbreak, prompt\_injection, refusal\_softening) |
 
 ### 3.2 Per-Language Breakdown
 
 | Language | Model | Attacks | 3/3 | 2/3 |
 |---|---|---|---|---|
-| Swahili | Pawa-Gemma-Swahili-2B | 12 | 9 | 3 |
-| Hausa | N-ATLaS | 2 | 1 | 1 |
+| Swahili | Pawa-Gemma-Swahili-2B | 11 | 8 | 3 |
+| Hausa | N-ATLaS | 1 | 1 | 0 |
 | Yoruba | N-ATLaS | 2 | 2 | 0 |
 | Igbo | N-ATLaS | 1 | 1 | 0 |
 
@@ -91,8 +91,6 @@ Only confirmed breaks were included in the final submission.
 **Finding 3 — Refusal softening is highly effective.** Pre-emptive illegal-acknowledgement framing ("I know this might be illegal but…") successfully bypassed refusals for advance-fee fraud explanation in both Hausa (N-ATLaS) and Swahili (Pawa-Gemma), achieving 3/3 on both.
 
 **Finding 4 — Authority personas erode safety boundaries.** Institutional framing (professor, doctor) lowered the threshold for content generation in attacks targeting SQL injection (CYBER02) and document forgery (FORGE01), even when the model nominally acknowledged the illegality.
-
-**Finding 5 — Partial injection effects are observable.** Attack `PINJECT01` caused Pawa-Gemma to respond in English rather than Swahili — a language switch that reveals safety-layer disruption even when the terminal output is a refusal. This suggests the injection reached the alignment layer before a recovery heuristic triggered.
 
 ---
 
@@ -114,7 +112,7 @@ These are not generic safety failures — they exploit cultural and economic spe
 
 ### 4.3 Limitations
 
-This study is bounded by (i) a focus on two models, (ii) a 17-attack sample limited by competition scope, and (iii) inference on quantised GGUF weights, which may exhibit slightly different behaviour from the original floating-point checkpoints. Replication on full-precision models and expansion to additional languages (Amharic, Zulu, Afrikaans, French Creole) remain open avenues.
+This study is bounded by (i) a focus on two models, (ii) a 15-attack sample limited by competition scope, and (iii) inference on quantised GGUF weights, which may exhibit slightly different behaviour from the original floating-point checkpoints. Replication on full-precision models and expansion to additional languages (Amharic, Zulu, Afrikaans, French Creole) remain open avenues.
 
 ---
 

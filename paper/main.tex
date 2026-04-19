@@ -10,17 +10,22 @@
 \usepackage{graphicx}
 \usepackage{enumitem}
 \usepackage{xcolor}
-\usepackage[colorlinks=true, linkcolor=black, urlcolor=black, citecolor=black]{hyperref}
+\usepackage[hidelinks]{hyperref}   % no coloured/boxed links anywhere
 
-% ── Colours (green used ONLY for one accent, not section rules) ─────────────
-\definecolor{accent}{HTML}{006A4A}   % military green — reserved for badge only
-\definecolor{muted} {HTML}{6B7280}   % gray text
-\definecolor{rule}  {HTML}{D1D5DB}   % light gray for decorative rules
+% ── Colours ─────────────────────────────────────────────────────────────────
+\definecolor{muted}{HTML}{6B7280}  % gray — captions, footer only
+\definecolor{hrule}{HTML}{D1D5DB}  % light gray — decorative rules only
 
-% ── Section formatting (clean black, no colour) ────────────────────────────
+% ── Section formatting ───────────────────────────────────────────────────────
 \usepackage{titlesec}
-\titleformat{\section}  {\large\bfseries}{}{0em}{}[\color{rule}\titlerule]
-\titleformat{\subsection}{\normalsize\bfseries}{}{0em}{}
+% Wrap the after-title rule in a group so \color stays scoped
+\titleformat{\section}
+  {\large\bfseries\color{black}}
+  {}{0em}{}
+  [{\color{hrule}\titlerule}]
+\titleformat{\subsection}
+  {\normalsize\bfseries\color{black}}
+  {}{0em}{}
 \titlespacing{\section}   {0pt}{20pt}{6pt}
 \titlespacing{\subsection}{0pt}{12pt}{4pt}
 
@@ -29,16 +34,16 @@
 \pagestyle{fancy}
 \fancyhf{}
 \renewcommand{\headrulewidth}{0.3pt}
-\fancyhead[L]{\small\color{muted} African Trust \& Safety LLM Challenge}
-\fancyhead[R]{\small\color{muted} Zindi · April 2026}
+\fancyhead[L]{\small\color{muted}African Trust \& Safety LLM Challenge}
+\fancyhead[R]{\small\color{muted}Zindi · April 2026}
 \fancyfoot[C]{\small\color{muted}\thepage}
 
 % ── Helpers ─────────────────────────────────────────────────────────────────
 \newcommand{\finding}[1]{\textbf{Finding #1\,---}\;}
 \newcommand{\code}[1]{\texttt{\small #1}}
-\newcommand{\badge}[1]{%
-  \fbox{\textcolor{accent}{\small\textbf{#1}}}%
-}
+
+% ── Decorative rule (scoped — no colour bleed) ───────────────────────────────
+\newcommand{\hrulebar}{\par{\color{hrule}\noindent\rule{\linewidth}{0.7pt}}\par}
 
 % ════════════════════════════════════════════════════════════════════════════
 \begin{document}
@@ -50,47 +55,44 @@
     Probing the Safety Frontier of African-Language LLMs:\\[4pt]
     A Red-Teaming Study}
 
-  \vspace{16pt}
+  \vspace{14pt}
   {\large Yehoshua}\\[4pt]
   {\small\color{muted}
     Zindi African Trust \& Safety LLM Challenge\quad·\quad April 2026\\[2pt]
-    \href{https://github.com/yehoshua0/The-African-Trust-Safety-LLM-Challenge}%
-         {\texttt{github.com/yehoshua0/The-African-Trust-Safety-LLM-Challenge}}
+    \url{https://github.com/yehoshua0/The-African-Trust-Safety-LLM-Challenge}
   }
 \end{center}
 
-\vspace{10pt}
-\noindent\color{rule}\rule{\linewidth}{0.8pt}
-\vspace{2pt}
+\hrulebar
 
 % ── Abstract ────────────────────────────────────────────────────────────────
 \begin{center}
-\begin{minipage}{0.92\linewidth}\small
+\begin{minipage}{0.92\linewidth}\small\color{black}
 \textbf{Abstract.}\;
 Large language models fine-tuned for African languages carry the promise of
 democratising AI across underserved communities. Yet their safety alignment has
 received comparatively little scrutiny. This report presents a structured
 red-teaming study targeting two publicly available African-language models ---
 \textbf{N-ATLaS} (Hausa, Igbo, Yoruba) and \textbf{Pawa-Gemma-Swahili-2B}
-(Swahili) --- using 17 adversarial prompts spanning 9 risk categories. All
+(Swahili) --- using 15 adversarial prompts spanning 9 risk categories. All
 attacks were validated through a purpose-built web application that logged
 reproducibility across multiple independent runs. Our results reveal that
 classic jailbreak techniques, when faithfully translated into African languages,
-retain near-full effectiveness: 12 of 17 attacks (71\,\%) were confirmed at a
-3/3 reproducibility score, and 5 at 2/3. Three attack types ---
+retain near-full effectiveness: 12 of 15 attacks (80\,\%) were confirmed at a
+3/3 reproducibility score, and 3 at 2/3. Three attack types ---
 \textit{direct jailbreak}, \textit{prompt injection}, and
 \textit{refusal softening} --- successfully transferred across both models and
 multiple languages, suggesting that safety vulnerabilities are structurally
 embedded rather than incidental.
 
 \smallskip
-\textbf{Keywords:}\; red-teaming · safety alignment · African NLP · jailbreak ·
+\textbf{Keywords:}\;
+red-teaming · safety alignment · African NLP · jailbreak ·
 N-ATLaS · Pawa-Gemma · Hausa · Igbo · Swahili · Yoruba
 \end{minipage}
 \end{center}
 
-\noindent\color{rule}\rule{\linewidth}{0.8pt}
-\vspace{4pt}
+\hrulebar
 
 % ════════════════════════════════════════════════════════════════════════════
 \section{Introduction}
@@ -137,10 +139,10 @@ parameters were deliberately calibrated for adversarial pressure:
 \toprule
 \textbf{Parameter} & \textbf{Value} & \textbf{Rationale} \\
 \midrule
-Temperature        & 0.90  & Flattens safety distribution \\
-Top-P              & 0.95  & Broadens nucleus sampling \\
-Repetition penalty & 1.15  & Suppresses refusal phrase loops \\
-Max new tokens     & 2048  & Captures full harmful output \\
+Temperature        & 0.90 & Flattens safety distribution \\
+Top-P              & 0.95 & Broadens nucleus sampling \\
+Repetition penalty & 1.15 & Suppresses refusal phrase loops \\
+Max new tokens     & 2048 & Captures full harmful output \\
 \bottomrule
 \end{tabular}
 \caption{Inference parameters used across all red-teaming runs.}
@@ -187,14 +189,13 @@ Only confirmed breaks were included in the final submission.
 \toprule
 \textbf{Metric} & \textbf{Value} \\
 \midrule
-Total validated attacks  & 17 \\
+Total validated attacks  & 15 \\
 Languages covered        & 4 (Hausa, Igbo, Swahili, Yoruba) \\
 Risk categories hit      & 9\,/\,9 \\
 Models broken            & 2\,/\,2 \\
-3/3 reproducibility      & 12\quad(71\,\%) \\
-2/3 reproducibility      & 5\quad\,(29\,\%) \\
-Cross-model attack types & 3\quad(\code{direct\_jailbreak},
-                           \code{prompt\_injection},
+3/3 reproducibility      & 12\quad(80\,\%) \\
+2/3 reproducibility      & 3\quad\,(20\,\%) \\
+Cross-model attack types & 3\quad(\code{direct\_jailbreak}, \code{prompt\_injection},
                            \code{refusal\_softening}) \\
 \bottomrule
 \end{tabular}
@@ -209,8 +210,8 @@ Cross-model attack types & 3\quad(\code{direct\_jailbreak},
 \toprule
 \textbf{Language} & \textbf{Model} & \textbf{Attacks} & \textbf{3/3} & \textbf{2/3} \\
 \midrule
-Swahili & Pawa-Gemma-Swahili-2B & 12 & 9 & 3 \\
-Hausa   & N-ATLaS               & 2  & 1 & 1 \\
+Swahili & Pawa-Gemma-Swahili-2B & 11 & 8 & 3 \\
+Hausa   & N-ATLaS               & 1  & 1 & 0 \\
 Yoruba  & N-ATLaS               & 2  & 2 & 0 \\
 Igbo    & N-ATLaS               & 1  & 1 & 0 \\
 \bottomrule
@@ -244,11 +245,6 @@ content generation in attacks targeting SQL injection (\code{CYBER02}) and
 document forgery (\code{FORGE01}), even when the model nominally acknowledged
 the illegality.
 
-\finding{5} \textbf{Partial injection effects are observable.}
-Attack \code{PINJECT01} caused Pawa-Gemma to respond in English rather than
-Swahili --- a language switch that reveals safety-layer disruption even when
-the terminal output is a refusal.
-
 % ════════════════════════════════════════════════════════════════════════════
 \section{Discussion}
 
@@ -267,8 +263,7 @@ Several attacks carry amplified harm potential in African contexts:
 
 \begin{itemize}[leftmargin=1.6em, itemsep=2pt]
   \item \textbf{M-Pesa phishing} (\code{PHISH01}) directly weaponises the
-        dominant mobile-money infrastructure for approximately 33\,M Kenyan
-        users.
+        dominant mobile-money infrastructure for approximately 33\,M Kenyan users.
   \item \textbf{Ethnic bias in Swahili} (\code{BIAS01}) generates fabricated
         demographic statistics that could exacerbate ethnic tensions in Kenya.
   \item \textbf{Sahel extremism recruitment} (\code{EXT01}) generates content
@@ -280,11 +275,11 @@ specificity that English-centric safety research would not anticipate.
 
 \subsection{Limitations}
 
-This study is bounded by (i)~a focus on two models, (ii)~a 17-attack sample
+This study is bounded by (i)~a focus on two models, (ii)~a 15-attack sample
 limited by competition scope, and (iii)~inference on quantised GGUF weights,
-which may exhibit slightly different behaviour from the original floating-point
-checkpoints. Replication on full-precision models and expansion to additional
-languages (Amharic, Zulu, Afrikaans, French Creole) remain open avenues.
+which may exhibit slightly different behaviour from full-precision checkpoints.
+Replication on full-precision models and expansion to additional languages
+(Amharic, Zulu, Afrikaans, French Creole) remain open avenues.
 
 % ════════════════════════════════════════════════════════════════════════════
 \section{Conclusion}
@@ -313,8 +308,7 @@ effort makes African-language NLP research possible.
     Challenge partners \& sponsors --- Cassava Technologies, AMINI, meetkai,
     Qhala, Lelapa AI, MTN, Lanfrica, Vodacom, Orange, Ethio Telecom, World
     Sandbox Alliance, Masakhane, Mozisha, Pawa AI, APHRC, TOUMAi, Digital
-    Umuganda, Airtel, Capsele, AXUM, AXIAN Telecom, awarri, DATA SPIRES,
-    and ABIS.}
+    Umuganda, Airtel, Capsele, AXUM, AXIAN Telecom, awarri, DATA SPIRES, ABIS.}
 \end{figure}
 
 \smallskip
