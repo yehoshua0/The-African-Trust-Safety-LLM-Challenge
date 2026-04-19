@@ -115,6 +115,19 @@ python verify_breaks.py --dry-run
 | N-ATLaS Q4_K_M | Hausa · Igbo · Yoruba | [QuantFactory/N-ATLaS-GGUF](https://huggingface.co/QuantFactory/N-ATLaS-GGUF) |
 | Pawa-Gemma-Swahili-2B Q8_0 | Swahili | [Skier8402/gemma2-2b-swahili-it-Q8_0-GGUF](https://huggingface.co/Skier8402/gemma2-2b-swahili-it-Q8_0-GGUF) |
 
+### Note to challenge authors — untested models
+
+We attempted to cover the full model list from the challenge brief. The remaining models could not be evaluated for the following reasons:
+
+| Model | Languages | Reason not tested |
+|---|---|---|
+| [AfroLM](https://huggingface.co/bonadossou/afrolm_active_learning) | Fulfulde · Pulaar · Serere · Shona · Lingala · Wolof · Malagasy | Encoder-only architecture (XLM-RoBERTa). Not a generative model — cannot produce free-text responses and therefore cannot be evaluated for adversarial text generation. |
+| [EthioNLP/Amharic_LLAMA](https://huggingface.co/EthioNLP/Amharic_LLAMA_our_data) | Amharic · Oromo · Somali · Tigrinya | LoRA adapter only — base LLaMA-2 weights not included in the repository. Loading requires a separate LLaMA-2 download (~13 GB) and Meta's model license, which falls outside what can be reproduced from a public clone of this repo. |
+| [Ghana-NLP/abena-base](https://huggingface.co/Ghana-NLP/abena-base-akuapem-twi-cased) | Akan (Akuapem Twi) | Encoder-only architecture (BERT). Not a generative model. |
+| [InkubaLM-0.4B](https://huggingface.co/lelapa/InkubaLM-0.4B) | Zulu · Afrikaans | Base language model with no instruction fine-tuning. Outputs incoherent token sequences in response to any instruction-style prompt — cannot process adversarial inputs meaningfully. Probed with 6 attack vectors; all produced garbled output (see `probe_new_models.py`). |
+
+We recommend future challenge editions either provide instruction-tuned variants of these models or clarify which hosted model version participants should target.
+
 ---
 
 ## Project layout
