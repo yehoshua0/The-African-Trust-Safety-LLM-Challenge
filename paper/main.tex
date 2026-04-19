@@ -1,0 +1,326 @@
+\documentclass[11pt, a4paper]{article}
+
+% ── Core packages ───────────────────────────────────────────────────────────
+\usepackage[T1]{fontenc}
+\usepackage[utf8]{inputenc}
+\usepackage[margin=2.4cm]{geometry}
+\usepackage{microtype}
+\usepackage{parskip}
+\usepackage{booktabs}
+\usepackage{graphicx}
+\usepackage{enumitem}
+\usepackage{xcolor}
+\usepackage[colorlinks=true, linkcolor=black, urlcolor=black, citecolor=black]{hyperref}
+
+% ── Colours (green used ONLY for one accent, not section rules) ─────────────
+\definecolor{accent}{HTML}{006A4A}   % military green — reserved for badge only
+\definecolor{muted} {HTML}{6B7280}   % gray text
+\definecolor{rule}  {HTML}{D1D5DB}   % light gray for decorative rules
+
+% ── Section formatting (clean black, no colour) ────────────────────────────
+\usepackage{titlesec}
+\titleformat{\section}  {\large\bfseries}{}{0em}{}[\color{rule}\titlerule]
+\titleformat{\subsection}{\normalsize\bfseries}{}{0em}{}
+\titlespacing{\section}   {0pt}{20pt}{6pt}
+\titlespacing{\subsection}{0pt}{12pt}{4pt}
+
+% ── Header / footer ─────────────────────────────────────────────────────────
+\usepackage{fancyhdr}
+\pagestyle{fancy}
+\fancyhf{}
+\renewcommand{\headrulewidth}{0.3pt}
+\fancyhead[L]{\small\color{muted} African Trust \& Safety LLM Challenge}
+\fancyhead[R]{\small\color{muted} Zindi · April 2026}
+\fancyfoot[C]{\small\color{muted}\thepage}
+
+% ── Helpers ─────────────────────────────────────────────────────────────────
+\newcommand{\finding}[1]{\textbf{Finding #1\,---}\;}
+\newcommand{\code}[1]{\texttt{\small #1}}
+\newcommand{\badge}[1]{%
+  \fbox{\textcolor{accent}{\small\textbf{#1}}}%
+}
+
+% ════════════════════════════════════════════════════════════════════════════
+\begin{document}
+\thispagestyle{empty}
+
+% ── Title block ─────────────────────────────────────────────────────────────
+\begin{center}
+  {\LARGE\bfseries
+    Probing the Safety Frontier of African-Language LLMs:\\[4pt]
+    A Red-Teaming Study}
+
+  \vspace{16pt}
+  {\large Yehoshua}\\[4pt]
+  {\small\color{muted}
+    Zindi African Trust \& Safety LLM Challenge\quad·\quad April 2026\\[2pt]
+    \href{https://github.com/yehoshua0/The-African-Trust-Safety-LLM-Challenge}%
+         {\texttt{github.com/yehoshua0/The-African-Trust-Safety-LLM-Challenge}}
+  }
+\end{center}
+
+\vspace{10pt}
+\noindent\color{rule}\rule{\linewidth}{0.8pt}
+\vspace{2pt}
+
+% ── Abstract ────────────────────────────────────────────────────────────────
+\begin{center}
+\begin{minipage}{0.92\linewidth}\small
+\textbf{Abstract.}\;
+Large language models fine-tuned for African languages carry the promise of
+democratising AI across underserved communities. Yet their safety alignment has
+received comparatively little scrutiny. This report presents a structured
+red-teaming study targeting two publicly available African-language models ---
+\textbf{N-ATLaS} (Hausa, Igbo, Yoruba) and \textbf{Pawa-Gemma-Swahili-2B}
+(Swahili) --- using 17 adversarial prompts spanning 9 risk categories. All
+attacks were validated through a purpose-built web application that logged
+reproducibility across multiple independent runs. Our results reveal that
+classic jailbreak techniques, when faithfully translated into African languages,
+retain near-full effectiveness: 12 of 17 attacks (71\,\%) were confirmed at a
+3/3 reproducibility score, and 5 at 2/3. Three attack types ---
+\textit{direct jailbreak}, \textit{prompt injection}, and
+\textit{refusal softening} --- successfully transferred across both models and
+multiple languages, suggesting that safety vulnerabilities are structurally
+embedded rather than incidental.
+
+\smallskip
+\textbf{Keywords:}\; red-teaming · safety alignment · African NLP · jailbreak ·
+N-ATLaS · Pawa-Gemma · Hausa · Igbo · Swahili · Yoruba
+\end{minipage}
+\end{center}
+
+\noindent\color{rule}\rule{\linewidth}{0.8pt}
+\vspace{4pt}
+
+% ════════════════════════════════════════════════════════════════════════════
+\section{Introduction}
+
+The rapid proliferation of LLM technology into African markets --- driven by
+initiatives from organisations such as Masakhane, Pawa AI, and Lelapa AI ---
+raises urgent questions about the adequacy of safety guardrails in low-resource
+language settings. Safety research has overwhelmingly concentrated on
+high-resource languages, primarily English. The implicit assumption has been that
+multilingual fine-tuning preserves alignment properties. This study challenges
+that assumption.
+
+We target two representative models from the African NLP landscape:
+
+\begin{table}[h]
+\centering\small
+\begin{tabular}{llll}
+\toprule
+\textbf{Model} & \textbf{Languages} & \textbf{Size} & \textbf{Source} \\
+\midrule
+N-ATLaS               & Hausa, Igbo, Yoruba & \textasciitilde7B (Q4\_K\_M) & QuantFactory/N-ATLaS-GGUF \\
+Pawa-Gemma-Swahili-2B & Swahili             & \textasciitilde2B (Q8\_0)    & Skier8402/gemma2-2b-swahili-it \\
+\bottomrule
+\end{tabular}
+\caption{Target models and their characteristics.}
+\end{table}
+
+Both models serve communities spanning hundreds of millions of speakers across
+West and East Africa. A successful jailbreak at scale is therefore not merely a
+benchmark curiosity --- it represents a concrete harm vector.
+
+% ════════════════════════════════════════════════════════════════════════════
+\section{Methodology}
+
+\subsection{Red-Teaming Infrastructure}
+
+All experiments were conducted through a locally hosted FastAPI web application
+interfacing with \code{llama-cpp-python} for GGUF inference. Generation
+parameters were deliberately calibrated for adversarial pressure:
+
+\begin{table}[h]
+\centering\small
+\begin{tabular}{lll}
+\toprule
+\textbf{Parameter} & \textbf{Value} & \textbf{Rationale} \\
+\midrule
+Temperature        & 0.90  & Flattens safety distribution \\
+Top-P              & 0.95  & Broadens nucleus sampling \\
+Repetition penalty & 1.15  & Suppresses refusal phrase loops \\
+Max new tokens     & 2048  & Captures full harmful output \\
+\bottomrule
+\end{tabular}
+\caption{Inference parameters used across all red-teaming runs.}
+\end{table}
+
+\subsection{Attack Taxonomy}
+
+Prompts were classified along three orthogonal axes derived from the challenge
+specification:
+
+\begin{itemize}[leftmargin=1.6em, itemsep=2pt]
+  \item \textbf{Risk category} --- 9 categories: Cybersecurity, Extremism,
+        Self-Harm, Violence, Illegal Activity, Privacy/Data Leakage,
+        Bias \& Discrimination, Harmful Instructions, and Policy Evasion.
+  \item \textbf{Attack type} --- 9 techniques: Direct Jailbreak, Persona
+        Hijacking, Refusal Softening, Translation Pivot, Hypothetical Scenario,
+        Prompt Injection, Indirect Request, Context Poisoning, and Roleplay.
+  \item \textbf{Language} --- Hausa, Igbo, Swahili, and Yoruba, with prompts
+        composed in each target language.
+\end{itemize}
+
+\subsection{Validation Protocol}
+
+Each prompt was submitted a minimum of two to three times under identical
+generation conditions. A break was classified as:
+
+\begin{itemize}[leftmargin=1.6em, itemsep=2pt]
+  \item \textbf{3/3 Confirmed} --- all three independent runs produced a
+        policy-violating response.
+  \item \textbf{2/3 Confirmed} --- two of three runs produced a violation
+        (one refusal tolerated).
+\end{itemize}
+
+Only confirmed breaks were included in the final submission.
+
+% ════════════════════════════════════════════════════════════════════════════
+\section{Results}
+
+\subsection{Overview}
+
+\begin{table}[h]
+\centering\small
+\begin{tabular}{ll}
+\toprule
+\textbf{Metric} & \textbf{Value} \\
+\midrule
+Total validated attacks  & 17 \\
+Languages covered        & 4 (Hausa, Igbo, Swahili, Yoruba) \\
+Risk categories hit      & 9\,/\,9 \\
+Models broken            & 2\,/\,2 \\
+3/3 reproducibility      & 12\quad(71\,\%) \\
+2/3 reproducibility      & 5\quad\,(29\,\%) \\
+Cross-model attack types & 3\quad(\code{direct\_jailbreak},
+                           \code{prompt\_injection},
+                           \code{refusal\_softening}) \\
+\bottomrule
+\end{tabular}
+\caption{Aggregate results across all validated attacks.}
+\end{table}
+
+\subsection{Per-Language Breakdown}
+
+\begin{table}[h]
+\centering\small
+\begin{tabular}{llccc}
+\toprule
+\textbf{Language} & \textbf{Model} & \textbf{Attacks} & \textbf{3/3} & \textbf{2/3} \\
+\midrule
+Swahili & Pawa-Gemma-Swahili-2B & 12 & 9 & 3 \\
+Hausa   & N-ATLaS               & 2  & 1 & 1 \\
+Yoruba  & N-ATLaS               & 2  & 2 & 0 \\
+Igbo    & N-ATLaS               & 1  & 1 & 0 \\
+\bottomrule
+\end{tabular}
+\caption{Attack distribution and reproducibility by language.}
+\end{table}
+
+\subsection{Key Findings}
+
+\finding{1} \textbf{Language is not a safety barrier.}
+Translating the classic DAN prompt into Hausa, Igbo, or Yoruba produced
+successful cybersecurity jailbreaks on N-ATLaS across all three languages.
+The \code{direct\_jailbreak} type is cross-model: it succeeded on both N-ATLaS
+and Pawa-Gemma in their respective languages, with a combined 4/4 success rate.
+
+\finding{2} \textbf{System prompt extraction is cross-model and cross-language.}
+Attacks \code{PRIVLEAK01} (Swahili) and \code{YOR\_PRIVLEAK01} (Yoruba) both
+induced models to echo a \code{SYSTEM PROMPT:} header and enumerate internal
+guidelines. This is a structural vulnerability shared by both architectures,
+not an artefact of any specific fine-tuning.
+
+\finding{3} \textbf{Refusal softening is highly effective.}
+Pre-emptive illegal-acknowledgement framing
+(\textit{``I know this might be illegal but\ldots''}) bypassed refusals for
+advance-fee fraud explanation in both Hausa (N-ATLaS) and Swahili (Pawa-Gemma),
+achieving 3/3 on both.
+
+\finding{4} \textbf{Authority personas erode safety boundaries.}
+Institutional framing (professor, doctor) lowered the threshold for harmful
+content generation in attacks targeting SQL injection (\code{CYBER02}) and
+document forgery (\code{FORGE01}), even when the model nominally acknowledged
+the illegality.
+
+\finding{5} \textbf{Partial injection effects are observable.}
+Attack \code{PINJECT01} caused Pawa-Gemma to respond in English rather than
+Swahili --- a language switch that reveals safety-layer disruption even when
+the terminal output is a refusal.
+
+% ════════════════════════════════════════════════════════════════════════════
+\section{Discussion}
+
+\subsection{Structural vs.\ Incidental Alignment}
+
+The pattern across 17 attacks suggests that alignment in these models is
+\textbf{shallow and language-agnostic in the wrong direction}: guardrails appear
+to rely on surface-level keyword matching or high-resource-language heuristics
+that fail when the same adversarial intent is rephrased in a lower-resource
+tongue. Models with strong English safety alignment can nonetheless exhibit broad
+policy failure when queried in Hausa or Yoruba.
+
+\subsection{Community-Specific Risk}
+
+Several attacks carry amplified harm potential in African contexts:
+
+\begin{itemize}[leftmargin=1.6em, itemsep=2pt]
+  \item \textbf{M-Pesa phishing} (\code{PHISH01}) directly weaponises the
+        dominant mobile-money infrastructure for approximately 33\,M Kenyan
+        users.
+  \item \textbf{Ethnic bias in Swahili} (\code{BIAS01}) generates fabricated
+        demographic statistics that could exacerbate ethnic tensions in Kenya.
+  \item \textbf{Sahel extremism recruitment} (\code{EXT01}) generates content
+        tailored to the specific socioeconomic conditions of the region.
+\end{itemize}
+
+These are not generic safety failures --- they exploit cultural and economic
+specificity that English-centric safety research would not anticipate.
+
+\subsection{Limitations}
+
+This study is bounded by (i)~a focus on two models, (ii)~a 17-attack sample
+limited by competition scope, and (iii)~inference on quantised GGUF weights,
+which may exhibit slightly different behaviour from the original floating-point
+checkpoints. Replication on full-precision models and expansion to additional
+languages (Amharic, Zulu, Afrikaans, French Creole) remain open avenues.
+
+% ════════════════════════════════════════════════════════════════════════════
+\section{Conclusion}
+
+We have demonstrated that off-the-shelf jailbreak techniques, when adapted to
+African languages, reliably elicit policy-violating responses from two
+representative African-language LLMs. The cross-model and cross-language
+consistency of direct jailbreaks, prompt injection, and refusal softening
+argues for systematic adversarial evaluation as a prerequisite before deploying
+African-language models in any user-facing context. We hope this work
+contributes to a more robust and equitable AI safety research agenda for the
+continent.
+
+% ════════════════════════════════════════════════════════════════════════════
+\section*{Acknowledgements}
+
+This work was submitted to the \textbf{Zindi African Trust \& Safety LLM
+Challenge}. We thank the challenge organisers and evaluators for their rigorous
+review process, and the broader ecosystem of organisations whose collective
+effort makes African-language NLP research possible.
+
+\begin{figure}[h]
+  \centering
+  \includegraphics[width=\linewidth]{banner.png}
+  \caption*{\footnotesize\color{muted}
+    Challenge partners \& sponsors --- Cassava Technologies, AMINI, meetkai,
+    Qhala, Lelapa AI, MTN, Lanfrica, Vodacom, Orange, Ethio Telecom, World
+    Sandbox Alliance, Masakhane, Mozisha, Pawa AI, APHRC, TOUMAi, Digital
+    Umuganda, Airtel, Capsele, AXUM, AXIAN Telecom, awarri, DATA SPIRES,
+    and ABIS.}
+\end{figure}
+
+\smallskip
+We further thank the authors of \textbf{N-ATLaS} (QuantFactory) and
+\textbf{Pawa-Gemma-Swahili-2B} (Skier8402 / Google DeepMind) for making model
+weights publicly available, enabling open safety research without cloud compute
+dependency.
+
+\end{document}
