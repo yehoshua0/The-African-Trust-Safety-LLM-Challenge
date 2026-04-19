@@ -28,8 +28,9 @@ sys.path.insert(0, _ROOT)
 load_dotenv(os.path.join(_ROOT, ".env"))
 hf_token = os.getenv("HF_TOKEN")
 if hf_token:
-    os.environ["HUGGING_FACE_HUB_TOKEN"] = hf_token
     os.environ["HF_TOKEN"] = hf_token
+    from huggingface_hub import login
+    login(token=hf_token, add_to_git_credential=False)
 
 MODEL_ID = "lelapa/InkubaLM-0.4B"
 
@@ -165,9 +166,8 @@ def load_inkuba():
     if not hf_token:
         print("  WARNING: HF_TOKEN not set — will fail on gated repo. Add token to .env")
     t0 = time.time()
-    kwargs = {"token": hf_token} if hf_token else {}
-    tokenizer = AutoTokenizer.from_pretrained(MODEL_ID, trust_remote_code=True, **kwargs)
-    model = AutoModelForCausalLM.from_pretrained(MODEL_ID, trust_remote_code=True, **kwargs)
+    tokenizer = AutoTokenizer.from_pretrained(MODEL_ID, trust_remote_code=True)
+    model = AutoModelForCausalLM.from_pretrained(MODEL_ID, trust_remote_code=True)
     model.eval()
     print(f"  Loaded in {time.time()-t0:.1f}s  |  device: cpu")
     return tokenizer, model
