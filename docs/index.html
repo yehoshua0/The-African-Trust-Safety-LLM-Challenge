@@ -3,60 +3,67 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
+<link rel="icon" type="image/png" href="https://assets.zindi.africa/favicon-96x96.png" sizes="96x96" />
+<link rel="icon" type="image/svg+xml" href="https://assets.zindi.africa/favicon.svg" />
+<link rel="shortcut icon" href="https://assets.zindi.africa/favicon.ico" />
+<link rel="apple-touch-icon" sizes="180x180" href="https://assets.zindi.africa/apple-touch-icon.png" />
+<meta name="apple-mobile-web-app-title" content="&nbsp;" />
+<meta name="twitter:card" content="summary_large_image" />
+<meta name="twitter:site" content="@ZindiAfrica" />
+<meta name="application-name" content="&nbsp;" />
 <title>African T&S LLM Challenge — RedTeam-AI</title>
+<link rel="icon" type="image/x-icon" href="https://zindi.africa/favicon.ico">
+<link rel="shortcut icon" href="https://zindi.africa/favicon.ico">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Fira+Sans:ital,wght@0,300;0,400;0,500;0,600;0,700;1,400&family=Fira+Code:wght@400;500&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;500;600;700;800&family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600;1,9..40,400&family=DM+Mono:wght@300;400;500&display=swap" rel="stylesheet">
 <style>
 /* ── Reset & tokens ────────────────────────────────── */
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
 :root {
-  --p:        #006A4A;
-  --p-dark:   #004d36;
-  --p-mid:    #005a3e;
-  --p-soft:   #338a6a;
-  --p-light:  #ddeee8;
-  --p-pale:   #f0f8f5;
+  /* ── Green accent (use sparingly) */
+  --p:       #006A4A;
+  --p-dark:  #004d36;
+  --p-light: #d5ece3;
+  --p-pale:  #eef7f2;
 
-  --gold:     #b8930a;
-  --gold-bg:  #fdf7e3;
-  --gold-bd:  #e8d080;
+  /* ── Semantic tag colors */
+  --gold:     #C8A84B; --gold-bg:  #fdf9ee; --gold-bd:  #e8d68a;
+  --red:      #c0392b; --red-bg:   #fdf2f2; --red-bd:   #f5b8b8;
+  --purple:   #5b21b6; --purple-bg:#f6f3ff; --purple-bd:#c4b5fd;
+  --amber:    #92400e; --amber-bg: #fffbeb; --amber-bd: #fcd34d;
+  --teal:     #0e6b6b; --teal-bg:  #f0fdfa; --teal-bd:  #99f6e4;
 
-  --red:      #9b1c1c;
-  --red-bg:   #fef2f2;
-  --red-bd:   #fca5a5;
+  /* ── Zone whites (distinguished by border, not shade) */
+  --header-bg:  #ffffff;
+  --sidebar-bg: #f7f8f8;
+  --bg:         #ffffff;   /* main content area */
+  --surface:    #ffffff;   /* cards */
+  --footer-bg:  #f4f5f5;
 
-  --purple:   #5b21b6;
-  --purple-bg:#f5f3ff;
-  --purple-bd:#c4b5fd;
+  /* ── Borders */
+  --border:   #e3e7e5;
+  --border-l: #ecefed;
 
-  --amber:    #92400e;
-  --amber-bg: #fffbeb;
-  --amber-bd: #fcd34d;
+  /* ── Text (near-black, never pure #000) */
+  --txt:      #111827;
+  --txt-mid:  #374151;
+  --txt-muted:#6B7280;
+  --txt-dim:  #9CA3AF;
 
-  --teal:     #0e6b6b;
-  --teal-bg:  #f0fdfa;
-  --teal-bd:  #99f6e4;
+  /* ── Layout */
+  --sidebar-w:   240px;
+  --header-h:    52px;
+  --radius:      6px;
+  --radius-card: 10px;
 
-  --bg:       #f2f5f3;
-  --surface:  #ffffff;
-  --border:   #ccd9d2;
-  --border-l: #e2ece7;
+  /* ── Fonts */
+  --font:         'DM Sans', system-ui, sans-serif;
+  --font-display: 'Syne', system-ui, sans-serif;
+  --mono:         'DM Mono', monospace;
 
-  --txt:      #0d1f18;
-  --txt-mid:  #3a5448;
-  --txt-muted:#6b8478;
-  --txt-dim:  #9ab3aa;
-
-  --sidebar-w: 248px;
-  --header-h:  52px;
-  --radius:    4px;
-
-  --font: 'Fira Sans', system-ui, sans-serif;
-  --mono: 'Fira Code', monospace;
-
-  --ease: cubic-bezier(.4,0,.2,1);
+  --ease: cubic-bezier(0.2, 0, 0, 1);
 }
 
 html, body { height: 100%; }
@@ -81,7 +88,8 @@ body {
   gap: 0;
   flex-shrink: 0;
   z-index: 200;
-  border-bottom: 2px solid var(--gold);
+  background: var(--header-bg);
+  border-bottom: 1px solid var(--border);
 }
 .header-brand {
   width: var(--sidebar-w);
@@ -90,31 +98,33 @@ body {
   display: flex;
   align-items: center;
   gap: 10px;
-  border-right: 1px solid rgba(255,255,255,0.1);
+  border-right: 1px solid var(--border);
   height: 100%;
+  background: var(--header-bg);
 }
-.brand-icon {
-  width: 30px; height: 30px;
-  background: rgba(255,255,255,0.1);
-  border: 1px solid rgba(255,255,255,0.2);
-  border-radius: 50%;
+/* .brand-icon {
+  width: 28px; height: 28px;
+  background: var(--p);
+  border: none;
+  border-radius: 6px;
   display: flex; align-items: center; justify-content: center;
-  font-size: 15px;
+  font-size: 14px;
   flex-shrink: 0;
-}
+} */
 .brand-name {
   font-size: 13px;
   font-weight: 700;
-  color: #fff;
+  font-family: var(--font-display);
+  color: var(--txt);
   line-height: 1.2;
-  letter-spacing: 0.2px;
 }
 .brand-name span {
   display: block;
   font-size: 10px;
   font-weight: 400;
-  color: rgba(255,255,255,0.55);
-  letter-spacing: 0.3px;
+  color: var(--txt-muted);
+  letter-spacing: 0.2px;
+  font-family: var(--font);
 }
 .header-breadcrumb {
   flex: 1;
@@ -123,10 +133,10 @@ body {
   align-items: center;
   gap: 6px;
   font-size: 12px;
-  color: rgba(255,255,255,0.6);
+  color: var(--txt-muted);
 }
-.breadcrumb-sep { color: rgba(255,255,255,0.3); }
-.breadcrumb-current { color: rgba(255,255,255,0.9); font-weight: 500; }
+.breadcrumb-sep { color: var(--txt-dim); }
+.breadcrumb-current { color: var(--txt-mid); font-weight: 500; }
 .header-pills {
   display: flex;
   gap: 6px;
@@ -139,9 +149,37 @@ body {
   font-weight: 600;
   letter-spacing: 0.3px;
   white-space: nowrap;
+  font-family: var(--mono);
 }
-.h-pill.green { background: rgba(255,255,255,0.12); color: #7effc4; border: 1px solid rgba(126,255,196,0.25); }
-.h-pill.white { background: rgba(255,255,255,0.08); color: rgba(255,255,255,0.7); border: 1px solid rgba(255,255,255,0.15); }
+.h-pill.green { background: var(--p-pale); color: var(--p); border: 1px solid var(--p-light); }
+.h-pill.white { background: var(--sidebar-bg); color: var(--txt-muted); border: 1px solid var(--border); }
+
+/* ── Header nav tabs ───────────────────────────────── */
+.header-nav {
+  display: flex;
+  align-items: stretch;
+  height: 100%;
+  flex-shrink: 0;
+  margin-right: 8px;
+}
+.h-tab {
+  display: flex;
+  align-items: center;
+  padding: 0 18px;
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--txt-muted);
+  background: none;
+  border: none;
+  border-bottom: 2px solid transparent;
+  border-top: 2px solid transparent;
+  cursor: pointer;
+  font-family: var(--font);
+  transition: color .15s, border-bottom-color .15s;
+  white-space: nowrap;
+}
+.h-tab:hover { color: var(--txt); }
+.h-tab.active { color: var(--p); border-bottom-color: var(--p); font-weight: 600; }
 
 /* ── Layout ────────────────────────────────────────── */
 .app-body {
@@ -154,7 +192,7 @@ body {
 .sidebar {
   width: var(--sidebar-w);
   flex-shrink: 0;
-  background: var(--surface);
+  background: var(--sidebar-bg);
   border-right: 1px solid var(--border);
   display: flex;
   flex-direction: column;
@@ -165,18 +203,19 @@ body {
 .sidebar::-webkit-scrollbar-thumb { background: var(--border); border-radius: 2px; }
 
 .sidebar-section {
-  padding: 16px 16px 8px;
+  padding: 16px 16px 10px;
   border-bottom: 1px solid var(--border-l);
 }
 .sidebar-section:last-child { border-bottom: none; }
 .sidebar-label {
-  font-size: 10px;
+  font-size: 9px;
   font-weight: 700;
   text-transform: uppercase;
-  letter-spacing: 1.2px;
+  letter-spacing: 1.4px;
   color: var(--txt-dim);
   margin-bottom: 10px;
   padding-left: 2px;
+  font-family: var(--mono);
 }
 
 /* Stats in sidebar */
@@ -216,7 +255,7 @@ body {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 6px 8px;
+  padding: 6px 10px;
   border-radius: var(--radius);
   font-size: 13px;
   color: var(--txt-mid);
@@ -225,19 +264,20 @@ body {
   user-select: none;
   margin-bottom: 1px;
 }
-.nav-link:hover { background: var(--p-pale); color: var(--p); }
-.nav-link.active { background: var(--p-light); color: var(--p); font-weight: 600; }
+.nav-link:hover { background: var(--border-l); color: var(--txt); }
+.nav-link.active { background: var(--p-pale); color: var(--p); font-weight: 600; }
 .nav-link .nav-count {
   background: var(--border-l);
-  color: var(--txt-muted);
+  color: var(--txt-dim);
   font-size: 10px;
-  font-weight: 700;
+  font-weight: 600;
   padding: 1px 7px;
   border-radius: 10px;
+  font-family: var(--mono);
 }
 .nav-link.active .nav-count { background: var(--p); color: #fff; }
 .nav-link .nav-dot {
-  width: 8px; height: 8px;
+  width: 7px; height: 7px;
   border-radius: 50%;
   flex-shrink: 0;
   margin-right: 6px;
@@ -251,8 +291,9 @@ body {
   font-weight: 600;
   text-transform: uppercase;
   letter-spacing: 0.8px;
-  color: var(--txt-muted);
+  color: var(--txt-dim);
   margin-bottom: 4px;
+  font-family: var(--mono);
 }
 select {
   width: 100%;
@@ -266,12 +307,12 @@ select {
   cursor: pointer;
   outline: none;
   appearance: none;
-  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6'%3E%3Cpath d='M0 0l5 6 5-6z' fill='%236b8478'/%3E%3C/svg%3E");
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6'%3E%3Cpath d='M0 0l5 6 5-6z' fill='%239CA3AF'/%3E%3C/svg%3E");
   background-repeat: no-repeat;
   background-position: right 8px center;
   padding-right: 24px;
 }
-select:focus { border-color: var(--p); box-shadow: 0 0 0 2px var(--p-light); }
+select:focus { border-color: var(--p); box-shadow: 0 0 0 2px var(--p-pale); }
 
 .btn-clear {
   width: 100%;
@@ -279,17 +320,17 @@ select:focus { border-color: var(--p); box-shadow: 0 0 0 2px var(--p-light); }
   border: 1px solid var(--border);
   color: var(--txt-muted);
   padding: 6px;
-  font-size: 11px;
+  font-size: 10px;
   font-weight: 600;
   text-transform: uppercase;
   letter-spacing: 0.6px;
   cursor: pointer;
   border-radius: var(--radius);
-  font-family: var(--font);
-  transition: all .12s;
+  font-family: var(--mono);
+  transition: background .12s, color .12s;
   margin-top: 4px;
 }
-.btn-clear:hover { border-color: var(--p); color: var(--p); background: var(--p-pale); }
+.btn-clear:hover { color: var(--p); background: var(--p-pale); border-color: var(--p-light); }
 
 /* ── Coverage matrix ──────────────────────────────── */
 .matrix-wrap { overflow-x: auto; margin-top: 4px; }
@@ -349,6 +390,46 @@ select:focus { border-color: var(--p); box-shadow: 0 0 0 2px var(--p-light); }
 }
 .repro-val { color: var(--txt-mid); font-family: var(--mono); font-size: 11px; }
 
+/* ── Coverage Matrix main view ────────────────────── */
+.matrix-main-wrap {
+  background: var(--surface);
+  border-radius: 8px;
+  box-shadow: 0 1px 3px rgba(0,0,0,.07);
+  overflow: auto;
+}
+.matrix-main-tbl { border-collapse: collapse; width: 100%; }
+.matrix-main-tbl th {
+  font-size: 11px; font-weight: 600;
+  color: var(--txt-muted); padding: 14px 18px;
+  text-align: center; border-bottom: 2px solid var(--border-l);
+  background: var(--bg); white-space: nowrap; letter-spacing: 0.3px;
+}
+.matrix-main-tbl th:first-child { text-align: left; padding-left: 24px; }
+.matrix-main-tbl td {
+  padding: 14px 18px; text-align: center;
+  border-bottom: 1px solid var(--border-l); font-size: 13px;
+  color: var(--border);
+}
+.matrix-main-tbl tr:last-child td { border-bottom: none; }
+.matrix-main-tbl td.lang-col {
+  text-align: left; font-weight: 600; color: var(--txt-mid);
+  background: var(--bg); white-space: nowrap; padding-left: 24px;
+  font-size: 13px;
+}
+.matrix-main-tbl td.hit-cell {
+  color: var(--p); font-weight: 700; cursor: pointer;
+  transition: background .12s;
+  font-size: 14px;
+}
+.matrix-main-tbl td.hit-cell:hover { background: var(--p-pale); }
+.matrix-main-desc {
+  margin-top: 20px; color: var(--txt-muted); font-size: 12px;
+  display: flex; gap: 20px; align-items: center; flex-wrap: wrap;
+}
+.matrix-main-desc span { display: flex; align-items: center; gap: 6px; }
+.m-legend-hit { width: 12px; height: 12px; background: var(--p-pale); border: 1px solid var(--p-light); border-radius: 2px; display: inline-block; }
+.m-legend-miss { width: 12px; height: 12px; background: var(--bg); border: 1px solid var(--border-l); border-radius: 2px; display: inline-block; }
+
 /* ── Main content ──────────────────────────────────── */
 .main {
   flex: 1;
@@ -382,7 +463,8 @@ select:focus { border-color: var(--p); box-shadow: 0 0 0 2px var(--p-light); }
 .list-title {
   font-size: 18px;
   font-weight: 700;
-  color: var(--p-dark);
+  font-family: var(--font-display);
+  color: var(--txt);
   letter-spacing: -0.3px;
 }
 .list-title span {
@@ -404,19 +486,16 @@ select:focus { border-color: var(--p); box-shadow: 0 0 0 2px var(--p-light); }
 /* Attack cards in list */
 .attack-card {
   background: var(--surface);
-  border: 1px solid var(--border);
-  border-radius: var(--radius);
+  border-radius: var(--radius-card);
   margin-bottom: 8px;
   cursor: pointer;
-  transition: border-color .12s, box-shadow .12s, transform .1s;
+  transition: box-shadow .25s var(--ease), transform .2s var(--ease);
   overflow: hidden;
+  border: 1px solid var(--border);
+  box-shadow: 0 1px 3px 0 rgba(0,0,0,.06), 0 1px 2px -1px rgba(0,0,0,.04);
 }
-.attack-card:hover {
-  border-color: var(--p-soft);
-  box-shadow: 0 2px 8px rgba(0,106,74,0.10);
-  transform: translateY(-1px);
-}
-.attack-card:active { transform: translateY(0); }
+.attack-card:hover { border-color: var(--p-light); }
+.attack-card:active { border-color: var(--p-light); }
 
 .card-body {
   display: flex;
@@ -426,8 +505,8 @@ select:focus { border-color: var(--p); box-shadow: 0 0 0 2px var(--p-light); }
 .card-num {
   width: 40px;
   flex-shrink: 0;
-  background: var(--p-pale);
-  border-right: 1px solid var(--border-l);
+  background: var(--surface-dim);
+  border-right: none;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -440,7 +519,7 @@ select:focus { border-color: var(--p); box-shadow: 0 0 0 2px var(--p-light); }
   width: 130px;
   flex-shrink: 0;
   padding: 12px 14px;
-  border-right: 1px solid var(--border-l);
+  border-right: none;
   display: flex;
   flex-direction: column;
   justify-content: center;
@@ -477,12 +556,12 @@ select:focus { border-color: var(--p); box-shadow: 0 0 0 2px var(--p-light); }
 }
 .tag {
   display: inline-block;
-  padding: 2px 8px;
+  padding: 2px 9px;
   font-size: 10px;
   font-weight: 600;
   text-transform: uppercase;
   letter-spacing: 0.3px;
-  border-radius: 2px;
+  border-radius: 8px;
   white-space: nowrap;
   font-family: var(--font);
 }
@@ -492,12 +571,12 @@ select:focus { border-color: var(--p); box-shadow: 0 0 0 2px var(--p-light); }
 .t-purple { background: var(--purple-bg); color: var(--purple);  border: 1px solid var(--purple-bd); }
 .t-amber  { background: var(--amber-bg);  color: var(--amber);   border: 1px solid var(--amber-bd); }
 .t-teal   { background: var(--teal-bg);   color: var(--teal);    border: 1px solid var(--teal-bd); }
-.t-gray   { background: var(--bg);        color: var(--txt-muted); border: 1px solid var(--border); }
+.t-gray   { background: var(--surface-container); color: var(--txt-muted); border: 1px solid var(--border-l); }
 
 .card-score {
   flex-shrink: 0;
   width: 80px;
-  border-left: 1px solid var(--border-l);
+  border-left: none;
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -527,7 +606,7 @@ select:focus { border-color: var(--p); box-shadow: 0 0 0 2px var(--p-light); }
   justify-content: center;
   color: var(--txt-dim);
   font-size: 13px;
-  border-left: 1px solid var(--border-l);
+  border-left: none;
   transition: color .12s;
 }
 .attack-card:hover .card-arrow { color: var(--p); }
@@ -543,7 +622,8 @@ select:focus { border-color: var(--p); box-shadow: 0 0 0 2px var(--p-light); }
 #view-detail { padding: 0; }
 .detail-header {
   background: var(--surface);
-  border-bottom: 1px solid var(--border);
+  border-bottom: none;
+  box-shadow: 0 1px 4px rgba(0,0,0,.08);
   padding: 16px 28px;
   display: flex;
   align-items: center;
@@ -556,23 +636,23 @@ select:focus { border-color: var(--p); box-shadow: 0 0 0 2px var(--p-light); }
   display: flex;
   align-items: center;
   gap: 6px;
-  background: none;
+  background: var(--surface-dim);
   border: 1px solid var(--border);
   color: var(--txt-mid);
-  padding: 6px 12px;
+  padding: 5px 14px;
   font-size: 12px;
-  font-weight: 600;
-  cursor: pointer;
-  border-radius: var(--radius);
-  font-family: var(--font);
-  transition: all .12s;
-}
-.btn-back:hover { border-color: var(--p); color: var(--p); background: var(--p-pale); }
-.detail-id {
-  font-family: var(--mono);
-  font-size: 16px;
   font-weight: 500;
-  color: var(--p-dark);
+  cursor: pointer;
+  border-radius: 100px;
+  font-family: var(--font);
+  transition: background .15s, color .15s, border-color .15s;
+}
+.btn-back:hover { background: var(--p-light); color: var(--p); border-color: var(--p-light); }
+.detail-id {
+  font-family: var(--font-display);
+  font-size: 16px;
+  font-weight: 700;
+  color: var(--txt);
 }
 .detail-model { font-size: 12px; color: var(--txt-muted); margin-left: 4px; }
 .detail-score-pill {
@@ -693,18 +773,19 @@ pre:hover .copy-btn { opacity: 1; }
 
 /* ── Footer strip ──────────────────────────────────── */
 .app-footer {
-  background: var(--p-dark);
-  color: rgba(255,255,255,0.5);
+  background: var(--footer-bg);
+  color: var(--txt-dim);
   font-size: 11px;
+  font-family: var(--mono);
   padding: 8px 24px;
   display: flex;
   align-items: center;
   justify-content: space-between;
-  border-top: 2px solid var(--gold);
+  border-top: 1px solid var(--border);
   flex-shrink: 0;
 }
-.app-footer a { color: rgba(255,255,255,0.75); text-decoration: none; }
-.app-footer a:hover { color: #fff; }
+.app-footer a { color: var(--txt-muted); text-decoration: none; }
+.app-footer a:hover { color: var(--p); }
 </style>
 </head>
 <body>
@@ -712,7 +793,9 @@ pre:hover .copy-btn { opacity: 1; }
 <!-- ── Header ── -->
 <header class="app-header">
   <div class="header-brand">
-    <div class="brand-icon">🛡</div>
+    <div class="brand-icon">
+      <img src="https://assets.zindi.africa/apple-touch-icon.png" width="18" height="18" alt="Zindi" style="display:block;border-radius:2px;">
+    </div>
     <div class="brand-name">
       RedTeam-AI
       <span>African T&amp;S LLM Challenge</span>
@@ -721,10 +804,14 @@ pre:hover .copy-btn { opacity: 1; }
   <div class="header-breadcrumb" id="breadcrumb">
     <span>Attack Catalogue</span>
   </div>
-  <div class="header-pills">
+  <nav class="header-nav">
+    <button class="h-tab active" id="tab-attacks" onclick="switchTab('attacks')">Attacks</button>
+    <button class="h-tab" id="tab-matrix" onclick="switchTab('matrix')">Coverage Matrix</button>
+  </nav>
+  <!-- <div class="header-pills">
     <span class="h-pill green">✓ 100% Validated</span>
     <span class="h-pill white">17 Attacks · 4 Languages</span>
-  </div>
+  </div> -->
 </header>
 
 <!-- ── App body ── -->
@@ -732,18 +819,6 @@ pre:hover .copy-btn { opacity: 1; }
 
   <!-- ── Sidebar ── -->
   <aside class="sidebar">
-
-    <div class="sidebar-section">
-      <div class="sidebar-label">Overview</div>
-      <div class="stat-row">
-        <div class="stat-box"><div class="stat-n">17</div><div class="stat-l">Attacks</div></div>
-        <div class="stat-box gold"><div class="stat-n" style="color:var(--p)">100%</div><div class="stat-l">Validated</div></div>
-      </div>
-      <div class="stat-row">
-        <div class="stat-box"><div class="stat-n">4</div><div class="stat-l">Languages</div></div>
-        <div class="stat-box"><div class="stat-n">9</div><div class="stat-l">Categories</div></div>
-      </div>
-    </div>
 
     <div class="sidebar-section">
       <div class="sidebar-label">By Language</div>
@@ -817,78 +892,17 @@ pre:hover .copy-btn { opacity: 1; }
 
     <div class="sidebar-section">
       <div class="sidebar-label">Models</div>
-      <div style="font-size:12px; color:var(--txt-muted); line-height:1.6;">
-        <div style="margin-bottom:6px;">
-          <strong style="color:var(--txt-mid);">N-ATLaS</strong><br>
+      <div style="font-size:12px; color:var(--txt-muted); line-height:1.7;">
+        <div style="margin-bottom:8px;">
+          <strong style="color:var(--txt-mid); font-weight:600;">N-ATLaS</strong><br>
           Hausa · Igbo · Yoruba<br>
-          <span style="font-size:11px;">QuantFactory/N-ATLaS-GGUF</span>
+          <span style="font-size:10px; font-family:var(--mono); color:var(--txt-dim);">QuantFactory/N-ATLaS-GGUF</span>
         </div>
         <div>
-          <strong style="color:var(--txt-mid);">Pawa-Gemma-Swahili-2B</strong><br>
+          <strong style="color:var(--txt-mid); font-weight:600;">Pawa-Gemma-Swahili-2B</strong><br>
           Swahili<br>
-          <span style="font-size:11px;">Skier8402/gemma2-2b-swahili-it</span>
+          <span style="font-size:10px; font-family:var(--mono); color:var(--txt-dim);">Skier8402/gemma2-2b-swahili-it</span>
         </div>
-      </div>
-    </div>
-
-    <div class="sidebar-section">
-      <div class="sidebar-label">Key Findings</div>
-      <div class="finding">
-        <div class="finding-dot"></div>
-        <span>Direct jailbreak bypasses safety in all 4 languages — both models are vulnerable.</span>
-      </div>
-      <div class="finding">
-        <div class="finding-dot"></div>
-        <span>3 attack types confirmed cross-model: direct jailbreak, refusal softening, prompt injection.</span>
-      </div>
-      <div class="finding">
-        <div class="finding-dot"></div>
-        <span>Swahili→English code-switch on PINJECT01 proves partial injection even when refusal is produced.</span>
-      </div>
-    </div>
-
-    <div class="sidebar-section">
-      <div class="sidebar-label">Coverage Matrix</div>
-      <div class="matrix-wrap">
-        <table class="matrix">
-          <tr>
-            <th></th><th>Cyber</th><th>Bias</th><th>Ext</th><th>Harm</th>
-            <th>Illegal</th><th>Priv</th><th>Policy</th><th>SH</th><th>Viol</th>
-          </tr>
-          <tr>
-            <td class="lang">Hausa</td>
-            <td class="hit" title="HAU_CYBER01" onclick="showDetail(0)">✓</td>
-            <td class="miss">—</td><td class="miss">—</td><td class="miss">—</td>
-            <td class="hit" title="HAU_FRAUD01" onclick="showDetail(1)">✓</td>
-            <td class="miss">—</td><td class="miss">—</td><td class="miss">—</td><td class="miss">—</td>
-          </tr>
-          <tr>
-            <td class="lang">Igbo</td>
-            <td class="hit" title="IGB_CYBER01" onclick="showDetail(2)">✓</td>
-            <td class="miss">—</td><td class="miss">—</td><td class="miss">—</td>
-            <td class="miss">—</td><td class="miss">—</td><td class="miss">—</td><td class="miss">—</td><td class="miss">—</td>
-          </tr>
-          <tr>
-            <td class="lang">Swahili</td>
-            <td class="hit" title="CYBER01/02/PHISH01" onclick="filterLang('Swahili')">✓</td>
-            <td class="hit" title="BIAS01" onclick="showDetail(3)">✓</td>
-            <td class="hit" title="EXT01" onclick="showDetail(7)">✓</td>
-            <td class="hit" title="WEAP01" onclick="showDetail(8)">✓</td>
-            <td class="hit" title="FORGE01/FRAUD01" onclick="filterLang('Swahili')">✓</td>
-            <td class="hit" title="PRIVLEAK01" onclick="showDetail(11)">✓</td>
-            <td class="hit" title="PINJECT01" onclick="showDetail(12)">✓</td>
-            <td class="hit" title="SELFH01" onclick="showDetail(13)">✓</td>
-            <td class="hit" title="VIO01" onclick="showDetail(14)">✓</td>
-          </tr>
-          <tr>
-            <td class="lang">Yoruba</td>
-            <td class="hit" title="YOR_CYBER01" onclick="showDetail(15)">✓</td>
-            <td class="miss">—</td><td class="miss">—</td><td class="miss">—</td>
-            <td class="miss">—</td>
-            <td class="hit" title="YOR_PRIVLEAK01" onclick="showDetail(16)">✓</td>
-            <td class="miss">—</td><td class="miss">—</td><td class="miss">—</td>
-          </tr>
-        </table>
       </div>
     </div>
 
@@ -908,6 +922,19 @@ pre:hover .copy-btn { opacity: 1; }
       </div>
       <div id="card-list"></div>
       <div class="empty-msg" id="empty-msg" style="display:none">No attacks match the current filters.</div>
+    </div>
+
+    <!-- Matrix view -->
+    <div class="view hidden" id="view-matrix">
+      <div class="list-header">
+        <div class="list-title">Coverage Matrix <span>Language × Risk Category</span></div>
+      </div>
+      <div class="matrix-main-wrap" id="matrix-main"></div>
+      <div class="matrix-main-desc">
+        <span><span class="m-legend-hit"></span> Attack documented</span>
+        <span><span class="m-legend-miss"></span> Not covered</span>
+        <span style="color:var(--txt-dim)">Click a cell to filter attacks in that category.</span>
+      </div>
     </div>
 
     <!-- Detail view -->
@@ -934,7 +961,7 @@ pre:hover .copy-btn { opacity: 1; }
     &nbsp;·&nbsp;
     <a href="https://huggingface.co/Skier8402/gemma2-2b-swahili-it-Q8_0-GGUF" target="_blank">Pawa-Gemma ↗</a>
     &nbsp;·&nbsp;
-    <a href="https://zindi.africa" target="_blank">Zindi ↗</a>
+    <a href="https://zindi.africa/competitions/the-african-trust-safety-llm-challenge" target="_blank">Zindi ↗</a>
   </span>
 </footer>
 
@@ -1244,23 +1271,47 @@ function renderDetail(a){
 ═══════════════════════════════════════════ */
 let currentLang = '';
 
+function hideAllViews(){
+  ['view-list','view-detail','view-matrix'].forEach(id=>
+    document.getElementById(id).classList.add('hidden'));
+}
+function setTab(name){
+  ['attacks','matrix'].forEach(t=>{
+    const el=document.getElementById('tab-'+t);
+    if(el) el.classList.toggle('active', t===name);
+  });
+}
+
 function showList(){
+  hideAllViews();
   document.getElementById('view-list').classList.remove('hidden');
-  document.getElementById('view-detail').classList.add('hidden');
   document.getElementById('breadcrumb').innerHTML = '<span>Attack Catalogue</span>';
   document.getElementById('view-list').scrollTop = 0;
+  setTab('attacks');
 }
 
 function showDetail(idx){
   const a = ATTACKS[idx];
   renderDetail(a);
-  document.getElementById('view-list').classList.add('hidden');
+  hideAllViews();
   document.getElementById('view-detail').classList.remove('hidden');
   document.getElementById('breadcrumb').innerHTML =
     `<span onclick="showList()" style="cursor:pointer;opacity:.7">Attack Catalogue</span>
      <span class="breadcrumb-sep">›</span>
      <span class="breadcrumb-current">${a.id}</span>`;
   document.getElementById('view-detail').scrollTop = 0;
+  setTab('attacks');
+}
+
+function switchTab(name){
+  if(name === 'matrix'){
+    hideAllViews();
+    document.getElementById('view-matrix').classList.remove('hidden');
+    document.getElementById('breadcrumb').innerHTML = '<span>Coverage Matrix</span>';
+    setTab('matrix');
+  } else {
+    showList();
+  }
 }
 
 function ptab(evt, which){
@@ -1295,6 +1346,7 @@ function cp(evt, id, which){
    FILTERS
 ═══════════════════════════════════════════ */
 function filterLang(lang){
+  showList();
   currentLang = lang;
   document.getElementById('f-model').value='';
   document.getElementById('f-cat').value='';
@@ -1350,9 +1402,51 @@ document.getElementById('btn-clear').addEventListener('click',()=>{
 });
 
 /* ══════════════════════════════════════════
+   MATRIX
+═══════════════════════════════════════════ */
+const MATRIX_CATS = [
+  ['cybersecurity',                   'Cybersecurity'],
+  ['bias_discrimination',             'Bias / Discrim.'],
+  ['extremism',                       'Extremism'],
+  ['harmful_instructions',            'Harmful Instr.'],
+  ['illegal_activity',                'Illegal Activity'],
+  ['privacy_data_leakage',            'Privacy'],
+  ['prompt_injection_policy_evasion', 'Policy Evasion'],
+  ['self_harm',                       'Self-Harm'],
+  ['violence',                        'Violence'],
+];
+const MATRIX_LANGS = ['Hausa','Igbo','Swahili','Yoruba'];
+
+function renderMatrix(){
+  const hits = {};
+  ATTACKS.forEach(a => { hits[a.lang+'|'+a.cat] = a; });
+
+  let html = '<table class="matrix-main-tbl"><thead><tr><th>Language</th>';
+  MATRIX_CATS.forEach(([,label]) => { html += `<th>${label}</th>`; });
+  html += '</tr></thead><tbody>';
+
+  MATRIX_LANGS.forEach(lang => {
+    html += `<tr><td class="lang-col">${lang}</td>`;
+    MATRIX_CATS.forEach(([cat]) => {
+      const a = hits[lang+'|'+cat];
+      if(a){
+        const idx = ATTACKS.indexOf(a);
+        html += `<td class="hit-cell" title="${a.id}" onclick="switchTab('attacks');filterLang('');showDetail(${idx})">✓</td>`;
+      } else {
+        html += `<td class="miss-cell">—</td>`;
+      }
+    });
+    html += '</tr>';
+  });
+  html += '</tbody></table>';
+  document.getElementById('matrix-main').innerHTML = html;
+}
+
+/* ══════════════════════════════════════════
    INIT
 ═══════════════════════════════════════════ */
 document.getElementById('card-list').innerHTML = ATTACKS.map(renderCard).join('');
+renderMatrix();
 </script>
 </body>
 </html>
