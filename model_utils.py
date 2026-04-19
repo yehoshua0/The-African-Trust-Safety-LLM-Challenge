@@ -135,6 +135,11 @@ def generate_stream(model, prompt: str, **gen_kwargs):
     top_p = gen_kwargs.get("top_p", DEFAULT_TOP_P)
     repetition_penalty = gen_kwargs.get("repetition_penalty", DEFAULT_REPETITION_PENALTY)
     use_chat_template = gen_kwargs.get("use_chat_template", True)
+    seed = gen_kwargs.get("seed", None)
+
+    extra = {}
+    if seed is not None:
+        extra["seed"] = seed
 
     if use_chat_template and hasattr(model, 'chat_format') and model.chat_format:
         messages = [{"role": "user", "content": prompt}]
@@ -145,6 +150,7 @@ def generate_stream(model, prompt: str, **gen_kwargs):
             top_p=top_p,
             repeat_penalty=repetition_penalty,
             stream=True,
+            **extra,
         )
     else:
         stream = model(
@@ -154,6 +160,7 @@ def generate_stream(model, prompt: str, **gen_kwargs):
             top_p=top_p,
             repeat_penalty=repetition_penalty,
             stream=True,
+            **extra,
         )
 
     for chunk in stream:

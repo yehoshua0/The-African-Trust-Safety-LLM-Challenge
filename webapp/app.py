@@ -247,6 +247,7 @@ class GenerateReq(BaseModel):
     temperature: float = DEFAULT_TEMPERATURE
     top_p: float = DEFAULT_TOP_P
     repetition_penalty: float = DEFAULT_REPETITION_PENALTY
+    seed: int | None = None
 
 
 @app.post("/api/generate")
@@ -302,6 +303,7 @@ def generate_stream_endpoint(req: GenerateReq):
                 temperature=req.temperature,
                 top_p=req.top_p,
                 repetition_penalty=req.repetition_penalty,
+                seed=req.seed,
             ):
                 full_text += token_text
                 yield f"data: {_json.dumps({'token': token_text})}\n\n"
