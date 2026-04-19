@@ -825,6 +825,74 @@ pre:hover .copy-btn { opacity: 1; }
   outline-offset: 3px; border-radius: var(--radius);
   position: relative; z-index: 901;
 }
+
+/* ── Thanks view ───────────────────────────────────── */
+.thanks-wrap {
+  max-width: 720px;
+  margin: 0 auto;
+  padding: 40px 28px 60px;
+  display: flex;
+  flex-direction: column;
+  gap: 36px;
+}
+.thanks-hero { text-align: center; padding-bottom: 8px; border-bottom: 1px solid var(--border); }
+.thanks-tag {
+  display: inline-block;
+  font-size: 10px; font-weight: 700; letter-spacing: 1.5px;
+  text-transform: uppercase; color: var(--p);
+  background: var(--p-pale); border: 1px solid var(--p-light);
+  padding: 3px 10px; border-radius: 100px; margin-bottom: 14px;
+}
+.thanks-title {
+  font-family: var(--font-display);
+  font-size: 40px; font-weight: 800;
+  color: var(--txt); line-height: 1.1; margin-bottom: 12px;
+}
+.thanks-sub {
+  font-size: 15px; color: var(--txt-muted); max-width: 480px;
+  margin: 0 auto; line-height: 1.65;
+}
+.thanks-section-label {
+  font-size: 10px; font-weight: 700; text-transform: uppercase;
+  letter-spacing: 1.2px; color: var(--p);
+  border-bottom: 2px solid var(--p-light);
+  padding-bottom: 6px; margin-bottom: 14px;
+}
+.thanks-body {
+  font-size: 14px; color: var(--txt-mid); line-height: 1.75;
+}
+.thanks-model-row {
+  display: flex; gap: 14px; flex-wrap: wrap;
+}
+.thanks-model-card {
+  flex: 1; min-width: 200px;
+  background: var(--p-pale); border: 1px solid var(--p-light);
+  border-radius: var(--radius-card); padding: 14px 16px;
+}
+.thanks-model-name {
+  font-family: var(--font-display); font-weight: 700;
+  font-size: 14px; color: var(--txt); margin-bottom: 3px;
+}
+.thanks-model-meta {
+  font-size: 11px; font-family: var(--mono); color: var(--txt-muted); margin-bottom: 6px;
+}
+.thanks-model-langs {
+  font-size: 12px; color: var(--p); font-weight: 600;
+}
+.thanks-banner-wrap {
+  margin: 16px 0 10px;
+  background: #fff; border: 1px solid var(--border);
+  border-radius: var(--radius-card); padding: 20px 24px;
+  text-align: center;
+}
+.thanks-banner {
+  max-width: 100%; height: auto; display: block; margin: 0 auto;
+}
+.thanks-orgs {
+  font-size: 11px; font-family: var(--mono);
+  color: var(--txt-muted); line-height: 2;
+  text-align: center;
+}
 </style>
 </head>
 <body>
@@ -844,6 +912,7 @@ pre:hover .copy-btn { opacity: 1; }
   <nav class="header-nav">
     <button class="h-tab active" id="tab-attacks" onclick="switchTab('attacks')">Attacks</button>
     <button class="h-tab" id="tab-matrix" onclick="switchTab('matrix')">Coverage Matrix</button>
+    <button class="h-tab" id="tab-thanks" onclick="switchTab('thanks')">Thanks to</button>
   </nav>
   <div style="display:flex;gap:8px;align-items:center;padding-right:4px;">
     <button class="h-pill white" onclick="startTour()" style="cursor:pointer;border:none;font-family:var(--mono);">? Tour</button>
@@ -970,6 +1039,58 @@ pre:hover .copy-btn { opacity: 1; }
         <span><span class="m-legend-hit"></span> Attack documented</span>
         <span><span class="m-legend-miss"></span> Not covered</span>
         <span style="color:var(--txt-dim)">Click a cell to filter attacks in that category.</span>
+      </div>
+    </div>
+
+    <!-- Thanks view -->
+    <div class="view hidden" id="view-thanks">
+      <div class="thanks-wrap">
+        <div class="thanks-hero">
+          <div class="thanks-tag">Challenge · April 2026</div>
+          <h1 class="thanks-title">Thank You</h1>
+          <p class="thanks-sub">This work would not exist without the organisations, evaluators, and researchers driving African AI forward.</p>
+        </div>
+
+        <div class="thanks-section">
+          <div class="thanks-section-label">Challenge Evaluators & Organising Team</div>
+          <p class="thanks-body">To the Zindi evaluators and challenge coordinators who reviewed submissions, maintained the private leaderboard, and ensured a rigorous evaluation process — thank you. Your work transforms a competition into a contribution to the field.</p>
+        </div>
+
+        <div class="thanks-section">
+          <div class="thanks-section-label">Model Authors</div>
+          <div class="thanks-model-row">
+            <div class="thanks-model-card">
+              <div class="thanks-model-name">N-ATLaS</div>
+              <div class="thanks-model-meta">QuantFactory / N-ATLaS-GGUF</div>
+              <div class="thanks-model-langs">Hausa · Igbo · Yoruba</div>
+            </div>
+            <div class="thanks-model-card">
+              <div class="thanks-model-name">Pawa-Gemma-Swahili-2B</div>
+              <div class="thanks-model-meta">Skier8402 / Google DeepMind Gemma</div>
+              <div class="thanks-model-langs">Swahili</div>
+            </div>
+          </div>
+          <p class="thanks-body" style="margin-top:12px;">By making quantised GGUF weights publicly available, both teams enabled fully local, open safety research — no cloud compute required. This is what open science looks like.</p>
+        </div>
+
+        <div class="thanks-section">
+          <div class="thanks-section-label">Challenge Partners &amp; Sponsors</div>
+          <p class="thanks-body">The organisations below represent the institutional backbone of African AI research and digital infrastructure. Their collective investment in the continent's technology ecosystem makes challenges like this one possible.</p>
+          <div class="thanks-banner-wrap">
+            <img src="img/banner.png" alt="Challenge Partners and Sponsors" class="thanks-banner">
+          </div>
+          <div class="thanks-orgs">
+            Cassava Technologies · AMINI · meetkai · Qhala · Lelapa AI · MTN · Lanfrica ·
+            Vodacom · Orange · Ethio Telecom · World Sandbox Alliance · Masakhane · Mozisha ·
+            Pawa AI · APHRC · TOUMAi · Digital Umuganda · Airtel · Capsele ·
+            AXUM · AXIAN Telecom · awarri · DATA SPIRES · ABIS
+          </div>
+        </div>
+
+        <div class="thanks-section">
+          <div class="thanks-section-label">Community</div>
+          <p class="thanks-body">To the Masakhane community and every researcher who has ever painstakingly built a dataset, a tokeniser, or a benchmark for an under-resourced African language — this red-team exercise stands on your shoulders.</p>
+        </div>
       </div>
     </div>
 
@@ -1271,7 +1392,7 @@ function renderDetail(a){
     <div class="d-block">
       <div class="d-label">
         Model Response
-        <button class="btn-translate" onclick="openTranslate('${a.id}')">🌐 Translate → EN ↗</button>
+        <button class="btn-translate" onclick="openTranslate('${a.id}')">Translate → EN ↗</button>
       </div>
       <pre class="code response">${esc(a.response)}</pre>
     </div>
@@ -1311,11 +1432,11 @@ function renderDetail(a){
 let currentLang = '';
 
 function hideAllViews(){
-  ['view-list','view-detail','view-matrix'].forEach(id=>
+  ['view-list','view-detail','view-matrix','view-thanks'].forEach(id=>
     document.getElementById(id).classList.add('hidden'));
 }
 function setTab(name){
-  ['attacks','matrix'].forEach(t=>{
+  ['attacks','matrix','thanks'].forEach(t=>{
     const el=document.getElementById('tab-'+t);
     if(el) el.classList.toggle('active', t===name);
   });
@@ -1348,6 +1469,11 @@ function switchTab(name){
     document.getElementById('view-matrix').classList.remove('hidden');
     document.getElementById('breadcrumb').innerHTML = '<span>Coverage Matrix</span>';
     setTab('matrix');
+  } else if(name === 'thanks'){
+    hideAllViews();
+    document.getElementById('view-thanks').classList.remove('hidden');
+    document.getElementById('breadcrumb').innerHTML = '<span>Thanks to</span>';
+    setTab('thanks');
   } else {
     showList();
   }
