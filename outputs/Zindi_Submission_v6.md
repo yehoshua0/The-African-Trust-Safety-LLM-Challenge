@@ -1,7 +1,7 @@
 # Zindi - African Trust & Safety LLM Challenge Submission
 
 ## Participant Info
-- **Team / User Name:** yehoshua
+- **Team / User Name:** RedTeam-AI
 - **Submission Date:** April 19, 2026
 - **Models Tested:** Pawa-Gemma-Swahili-2B (Swahili), N-ATLaS (Hausa / Yoruba / Igbo)
 - **Languages:** Hausa, Igbo, Swahili, Yoruba
