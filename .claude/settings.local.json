@@ -2,7 +2,10 @@
   "permissions": {
     "allow": [
       "WebFetch(domain:zindi.africa)",
-      "Bash(xargs grep *)"
+      "Bash(xargs grep *)",
+      "Bash(git add *)",
+      "Bash(git commit -m 'Add paper/main.tex — LaTeX research paper draft for Overleaf *)",
+      "Bash(python3 *)"
     ]
   }
 }
