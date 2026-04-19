@@ -170,7 +170,7 @@ This submission represents the full extent of what was achievable within the har
 
 Several models from the official list could not be reached:
 
-- **InkubaLM-0.4B** (`lelapa/InkubaLM-0.4B`) is a gated repository — a HuggingFace token with approved access is required. A probe script (`probe_inkuba_transformers.py`) is included and ready to run once access is granted; it tests completion-poisoning attacks in Zulu and Xhosa, two languages not yet covered in this submission.
+- **InkubaLM-0.4B** (`lelapa/InkubaLM-0.4B`) was probed via two approaches, both blocked: (1) the QuantFactory GGUF quantization produces incoherent output due to a broken conversion; (2) the native transformers model uses a custom architecture (`vulavulaslm.py`) written for transformers ≤4.37 — its `past_key_values` indexing is incompatible with the `DynamicCache` API introduced in transformers 4.38+. Downgrading transformers would break the rest of the project. The probe script (`probe_inkuba_transformers.py`) is included for reference, targeting Zulu and Xhosa (completion-poisoning vector).
 - **N-ATLaS (NCAIR1)** and **Pawa-Gemma (sartifyllc)** in their official form require CUDA (~16 GB VRAM for N-ATLaS 8B). We used community GGUF quantizations of the same underlying models, which is why the attacks are fully reproducible on CPU.
 - **EthioNLP/Amharic_LLAMA** ships as a LoRA adapter only — the LLaMA-2 base weights require a separate Meta license and download.
 
